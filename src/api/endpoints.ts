@@ -11,6 +11,7 @@ import type {
   Copa,
   NuevoProyecto,
   Ortomosaico,
+  ParametrosInferencia,
   Proyecto,
   TrabajoInferencia,
 } from "./types";
@@ -67,11 +68,12 @@ export function registrarOrtomosaico(
 
 export function iniciarInferencia(
   proyectoId: string,
+  parametros: ParametrosInferencia,
 ): Promise<TrabajoInferencia> {
   return requestConCuerpo<TrabajoInferencia>(
     "POST",
     `/proyectos/${proyectoId}/trabajos`,
-    {},
+    parametros,
   );
 }
 

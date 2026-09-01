@@ -91,6 +91,7 @@ src/
     browser.ts        setupWorker
     server.ts         setupServer, para las pruebas
     handlers.ts       Handlers MSW. Tiene estado: ver la nota de abajo
+    trabajos.ts       Motor del trabajo de inferencia simulado
     fixtures.ts       Carga los fixtures y los adapta al modelo de dominio
     generador.ts      Generación sintética con semilla fija
     fondoSimulado.ts  Ortomosaico sustituto en SVG. Ver §9
@@ -101,6 +102,8 @@ src/
       useCrearProyecto.ts
     carga/            RF-02 a RF-05
     procesamiento/    RF-06 a RF-12
+      useTrabajos.ts  Sondeo del avance
+      Bitacora.tsx
     visor/            RF-13 a RF-22
       estilosCopa.ts  Estado de una copa y su apariencia. Sin React
       metricas.ts     Filtros y métricas agregadas. Funciones puras
@@ -109,6 +112,8 @@ src/
       PanelMetricas.tsx
       MiniaturaCopa.tsx  Recorte del ortomosaico alrededor de una copa
     exportacion/      RF-23 a RF-25
+      formatos.ts     Genera GeoJSON y CSV. Funciones puras
+      descargar.ts    Toca el DOM. Aparte de formatos.ts a proposito
   components/
     layout/
       Shell.tsx       Cabecera, migas de pan y pasos del flujo
@@ -197,6 +202,12 @@ export interface Copa {
 El campo `origen` existe desde el primer día. Es el requerimiento RF-22 y no se agrega después.
 El campo `eliminada` tampoco: es lo que hace posible la regla de eliminación de esta misma
 sección.
+
+**Exportación.** Todo archivo que sale de la aplicación lleva un bloque de procedencia:
+proyecto, fecha, CRS, filtros aplicados, cuántas copas de cuántas salieron, cuántas se
+descartaron por borrado lógico, y el aviso de que los datos son simulados. Sin eso el archivo no
+es defendible en un anexo. El CSV va con punto y coma, coma decimal y BOM, para abrirse de doble
+clic en Excel configurado en español.
 
 **Diámetro de copa.** `diametroM` es el **diámetro de círculo equivalente**, `2·√(A/π)`. Se
 prefiere sobre el promedio de dos anchos perpendiculares porque no depende de la orientación en

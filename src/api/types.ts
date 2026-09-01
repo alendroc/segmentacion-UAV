@@ -149,6 +149,29 @@ export interface EntradaBitacora {
   mensaje: string;
 }
 
+/**
+ * Parametros con los que se lanza la deteccion.
+ *
+ * El teselado no es un detalle de implementacion: el ortomosaico no cabe en
+ * memoria, hay que recortarlo, y el traslape es la razon por la que despues hay
+ * que unir los poligonos que quedan partidos en los bordes de los mosaicos.
+ */
+export interface ParametrosInferencia {
+  tamanoMosaicoPx: number;
+  /** Traslape entre mosaicos, en porcentaje. */
+  traslapePct: number;
+  /** Umbral inicial. Se puede mover despues sin reprocesar (RF-16). */
+  confianzaMinima: number;
+  areaMinimaM2: number;
+}
+
+export const PARAMETROS_POR_DEFECTO: ParametrosInferencia = {
+  tamanoMosaicoPx: 1024,
+  traslapePct: 20,
+  confianzaMinima: 0.5,
+  areaMinimaM2: 1.5,
+};
+
 export interface TrabajoInferencia {
   id: string;
   proyectoId: string;
@@ -158,6 +181,10 @@ export interface TrabajoInferencia {
   progreso: number;
   /** Etapa legible, p. ej. "Teselando el ortomosaico". */
   etapa: string;
+  /** Mosaico en curso y total, para el detalle del progreso. */
+  mosaicoActual: number;
+  mosaicosTotales: number;
+  parametros: ParametrosInferencia;
   iniciadoEn: string | null;
   finalizadoEn: string | null;
   copasDetectadas: number | null;

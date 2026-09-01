@@ -217,6 +217,11 @@ mock pasó a tener estado, y con él una función de reinicio para que no se fil
 
 ## Fase 6 — Corrección manual, parte uno ← **siguiente**
 
+> **Pendiente, y se saltó.** Las pantallas de procesamiento y exportación de la Fase 8 se
+> construyeron antes que esta fase, a pedido, para tener el flujo completo recorrible. La
+> exportación no depende de la corrección manual, así que no hay deuda técnica; lo que falta es
+> que `origen` llegue a valer `"manual"` o `"corregido"` con datos reales.
+
 **Cubre.** RF-19, RF-20, RF-22.
 
 **Archivos**
@@ -270,7 +275,7 @@ mock pasó a tener estado, y con él una función de reinicio para que no se fil
 
 ---
 
-## Fase 8 — Flujo completo y exportación
+## Fase 8 — Flujo completo y exportación — **COMPLETADA**
 
 **Cubre.** RF-01 a RF-12, RF-23, RF-24, RF-25.
 
@@ -292,6 +297,38 @@ mock pasó a tener estado, y con él una función de reinicio para que no se fil
    archivo declara cuántas de cuántas se exportaron.
 4. Durante el procesamiento el usuario puede navegar por la aplicación sin bloqueo.
 5. Los tres estados de la lista de proyectos se pueden reproducir desde el mock.
+
+**Resultado (1 de setiembre de 2026).**
+
+1. **Verificado por prueba, no en QGIS.** No hay QGIS disponible. La prueba exige que el GeoJSON
+   declare `urn:ogc:def:crs:EPSG::5367` y que las coordenadas sean métricas de seis y siete
+   cifras, no grados. Abrirlo en QGIS sigue pendiente de comprobación manual.
+2. **Verificado por prueba, no en una hoja de cálculo.** Una fila por copa, encabezados legibles,
+   punto y coma como separador, coma decimal y BOM UTF-8, que es lo que necesita Excel en
+   español. Falta abrirlo de verdad.
+3. **Cumple.** La pantalla dice "131 de 131" y los dos formatos llevan `copasExportadas`,
+   `copasRegistradas` y `copasDescartadas` en su bloque de procedencia.
+4. **Cumple.** El sondeo vive en la caché de TanStack Query: se puede ir al visor y volver sin
+   perder el seguimiento. El intervalo se apaga solo al llegar a un estado final.
+5. **Cumple** desde la Fase 1.
+
+**Procesamiento.** Parámetros de teselado y umbrales configurables; el número de mosaicos sale de
+la extensión real y la resolución declarada, no de un valor inventado. Barra de progreso con la
+etapa nombrada, mosaico N de M, bitácora fechada y botón de cancelar. El progreso se **deriva del
+tiempo transcurrido** en cada consulta, no de un temporizador: el mock no tiene relojes que
+limpiar y las pruebas pueden fijar el instante.
+
+**Decisión sobre el modelo.** No se ofrece selector de arquitectura ni de pesos. Mientras no haya
+modelo entrenado, un desplegable con Mask R-CNN, U-Net o SAM sugeriría una comparación que nadie
+ha hecho. En su lugar hay una nota que dice qué irá ahí.
+
+**Formatos que quedan fuera, con el motivo visible.** GeoPackage (es SQLite), Shapefile (cuatro
+archivos y campos de 10 caracteres), máscara GeoTIFF (es un ráster) y reporte PDF. No se simula su
+descarga.
+
+**Sin bloque de validación contra parcelas de campo.** El mockup lo proponía —precisión,
+exhaustividad, F1, IoU y tabla por parcela—, pero el TFG valida la interfaz, no el desempeño de un
+modelo que no existe.
 
 ---
 
