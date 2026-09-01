@@ -26,7 +26,10 @@ describe("ProyectosPage", () => {
   it("distingue los proyectos sin deteccion ejecutada", async () => {
     renderConProveedores(<ProyectosPage />);
 
-    expect(await screen.findByText("147 copas detectadas")).toBeInTheDocument();
+    // El conteo sale del fixture generado; no se fija a mano.
+    expect(
+      await screen.findByText(/^\d+ copas detectadas$/),
+    ).toBeInTheDocument();
     expect(screen.getAllByText("Sin deteccion ejecutada")).toHaveLength(3);
   });
 });

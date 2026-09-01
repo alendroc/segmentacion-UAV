@@ -1,0 +1,52 @@
+{
+  "type": "FeatureCollection",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:EPSG::5367"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": "ai-001",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              340840,
+              1122050
+            ],
+            [
+              340960,
+              1122050
+            ],
+            [
+              340960,
+              1122150
+            ],
+            [
+              340840,
+              1122150
+            ],
+            [
+              340840,
+              1122050
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "ai-001",
+        "areaHa": 1.2,
+        "extension": {
+          "minX": 340840,
+          "minY": 1122050,
+          "maxX": 340960,
+          "maxY": 1122150
+        }
+      }
+    }
+  ]
+}

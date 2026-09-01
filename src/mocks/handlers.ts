@@ -6,15 +6,15 @@
  * (CLAUDE.md, seccion 2).
  */
 import { http, HttpResponse } from "msw";
+import type { CapacidadesExportacion } from "@/api/endpoints";
 import type {
-  CapacidadesExportacion,
-} from "@/api/endpoints";
-import type {
+  AreaInteres,
   Copa,
   Proyecto,
   RespuestaError,
   TrabajoInferencia,
 } from "@/api/types";
+import { AREA_DE_INTERES, COPAS, PROYECTO_CON_DATOS } from "./fixtures";
 
 const BASE = "/api";
 
@@ -25,7 +25,7 @@ const BASE = "/api";
  */
 const PROYECTOS: Proyecto[] = [
   {
-    id: "pr-001",
+    id: PROYECTO_CON_DATOS,
     nombre: "Lote Norte",
     descripcion:
       "Parcela permanente de monitoreo en bosque tropical seco secundario.",
@@ -34,7 +34,8 @@ const PROYECTOS: Proyecto[] = [
     actualizadoEn: "2026-04-02T18:05:00.000Z",
     estado: "completado",
     ortomosaicoId: "om-001",
-    totalCopas: 147,
+    // Se deriva del fixture: si el generador cambia, el conteo lo acompana.
+    totalCopas: COPAS.length,
   },
   {
     id: "pr-002",
@@ -102,9 +103,18 @@ export const handlers = [
       : noEncontrado("El proyecto solicitado no existe.");
   }),
 
-  /* Copas — RF-13. Se llenan en la Fase 2 con el generador sintetico. */
-  http.get(`${BASE}/proyectos/:proyectoId/copas`, () =>
-    HttpResponse.json<Copa[]>([]),
+  /* Copas — RF-13. Solo el proyecto con deteccion ejecutada tiene copas. */
+  http.get(`${BASE}/proyectos/:proyectoId/copas`, ({ params }) =>
+    HttpResponse.json<Copa[]>(
+      params.proyectoId === PROYECTO_CON_DATOS ? COPAS : [],
+    ),
+  ),
+
+  /* Area de interes — denominador de la densidad de RF-18. */
+  http.get(`${BASE}/proyectos/:proyectoId/area-interes`, ({ params }) =>
+    params.proyectoId === PROYECTO_CON_DATOS
+      ? HttpResponse.json<AreaInteres>(AREA_DE_INTERES)
+      : noEncontrado("El proyecto no tiene un area de interes definida."),
   ),
 
   /* Inferencia — RF-06 a RF-12. Se implementa en la Fase 8. */

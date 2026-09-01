@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc -b --noEmit"
+    "typecheck": "tsc -b --noEmit",
+    "fixtures": "node scripts/generar-fixtures.ts"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.3.0",
@@ -21,6 +22,8 @@
     "lucide-react": "^1.39.0",
     "motion": "^13.1.1",
     "next-themes": "^0.4.6",
+    "ol": "^10.10.0",
+    "proj4": "^2.22.0",
     "radix-ui": "^1.6.7",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
@@ -36,8 +39,11 @@
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.6",
+    "@turf/area": "^7.4.0",
+    "@turf/helpers": "^7.4.0",
     "@types/geojson": "^7946.0.16",
     "@types/node": "^24.13.3",
+    "@types/proj4": "^2.5.6",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.1.0",
