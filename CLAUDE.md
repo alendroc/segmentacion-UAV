@@ -89,8 +89,11 @@ src/
     endpoints.ts      Funciones por endpoint. Nada de fetch suelto fuera de aquí.
   mocks/
     browser.ts        setupWorker
+    server.ts         setupServer, para las pruebas
     handlers.ts       Handlers MSW
+    fixtures.ts       Carga los fixtures y los adapta al modelo de dominio
     generador.ts      Generación sintética con semilla fija
+    fondoSimulado.ts  Ortomosaico sustituto en SVG. Ver §9
     fixtures/         GeoJSON producido por el generador
   features/
     proyectos/        RF-01
@@ -111,7 +114,8 @@ src/
     useMovimientoReducido.ts  Preferencia de movimiento. Único lector. Ver §6 bis
   lib/
     utils.ts          Helper `cn()` que crea shadcn. No lo borrés: lo usan todos los componentes
-    geo.ts            Área, diámetro, centroide, transformaciones de CRS
+    geometriaPlana.ts Área, diámetro, centroide. SIN IMPORTS. Ver la nota de abajo
+    geo.ts            Registro de EPSG:5367, transformaciones de CRS. Reexporta geometriaPlana
     formato.ts        Formateo de números y coordenadas
   test/
     setup.ts          Arranque de Vitest. Registra MSW para TODAS las pruebas
@@ -124,6 +128,13 @@ directorio es código vendorizado; se regenera con el CLI y no se edita a mano.
 `src/test/setup.ts` es el único punto donde se registra MSW en las pruebas. Gracias a eso, ni
 siquiera los archivos de prueba de `features/` necesitan importar `mocks/` y la regla de oro se
 verifica con un solo `grep`.
+
+`scripts/generar-fixtures.ts` vive fuera de `src/` y se ejecuta con `npm run fixtures`.
+
+**Por qué `geometriaPlana.ts` está separado de `geo.ts`.** El script de fixtures corre bajo Node
+plano y no puede cargar proj4 ni OpenLayers. La matemática pura, que no necesita ninguna de las
+dos, vive en un archivo sin un solo `import`; `geo.ts` la reexporta para que el resto de la
+aplicación siga teniendo una sola puerta.
 
 Una carpeta por `feature`, y cada `feature` es dueña de sus pantallas y sus hooks. Lo compartido
 sube a `components/ui` o a `lib`.
@@ -159,6 +170,17 @@ export interface Copa {
 El campo `origen` existe desde el primer día. Es el requerimiento RF-22 y no se agrega después.
 El campo `eliminada` tampoco: es lo que hace posible la regla de eliminación de esta misma
 sección.
+
+**Diámetro de copa.** `diametroM` es el **diámetro de círculo equivalente**, `2·√(A/π)`. Se
+prefiere sobre el promedio de dos anchos perpendiculares porque no depende de la orientación en
+que se midan y es reproducible a partir de la sola geometría. Hay que poder defenderlo en el
+informe.
+
+**Aritmética de coordenadas.** Toda fórmula que combine coordenadas proyectadas se calcula
+**respecto de un origen local**, restando el primer vértice antes de operar. En EPSG:5367 una copa
+vive alrededor de (340 000, 1 122 000): los productos cruzados rondan 3.8·10¹¹ y la diferencia se
+pierde en la precisión del `double`. Sin esa traslación, el centroide llega a caer metros fuera
+del polígono. `geometriaPlana.ts` ya lo hace; cualquier función nueva tiene que hacerlo también.
 
 **Filtros.** Los filtros de confianza y área **ocultan**, no borran. El conteo visible se
 recalcula; el dato persiste.
@@ -220,6 +242,7 @@ y `eliminada` opacidad reducida, para no depender de la percepción cromática.
 ```bash
 npm run dev        # servidor de desarrollo
 npm run build      # compilación de producción — debe pasar sin errores de TS
+npm run fixtures   # regenera los datos sintéticos. Debe dar archivos idénticos
 npm run test       # Vitest, una pasada
 npm run test:watch # Vitest en modo continuo
 npm run lint       # oxlint
@@ -278,8 +301,12 @@ Registro exigido por §3. Cada entrada se traslada al informe del TFG.
 | `@types/geojson` | Tipos de `GeoJSON.Polygon` que usa el modelo de dominio de §5 |
 | `vitest`, `jsdom`, `@testing-library/*` | Pruebas unitarias y de componente |
 | `oxlint` | Linter del andamiaje de Vite. Sustituye a ESLint y evita seis dependencias más |
+| `ol` | Mapa: edición de geometrías y soporte de CRS arbitrario |
+| `proj4`, `@types/proj4` | Registro de EPSG:5367 y transformaciones |
+| `@turf/area`, `@turf/helpers` | Solo en pruebas: contraste independiente del área. Ver la nota de §5 |
 
-Pendientes de instalar en fases posteriores, ya previstos en §3: `ol`, `proj4`, `@turf/turf`.
+Pendiente de instalar en la Fase 7, ya previsto en §3: el resto de `@turf/*` para unión y
+división de polígonos.
 
 ---
 
@@ -293,3 +320,16 @@ necesita en las Fases 3 y 7, que son las de riesgo técnico real. Se agregaron �
 **1 de setiembre de 2026 — React 19 y oxlint.** El andamiaje de `create-vite` 9 genera React 19 y
 oxlint. Se aceptaron ambos: React 19 es lo que soporta shadcn hoy, y oxlint cubre `npm run lint`
 sin sumar dependencias. §3 y §7 quedaron actualizados.
+
+**1 de setiembre de 2026 — geometría plana separada de `geo.ts`.** El script de fixtures corre
+bajo Node plano y no puede cargar proj4 ni OpenLayers, así que la matemática pura se movió a
+`lib/geometriaPlana.ts`, sin ningún `import`. `geo.ts` la reexporta. Ver §4.
+
+**1 de setiembre de 2026 — el área de Turf no es referencia de área.** Turf mide sobre una esfera,
+no sobre el elipsoide. Para las áreas de copa manda el cálculo plano en EPSG:5367. Ver §5 y el
+resultado de la Fase 2 en `PLAN.md`.
+
+**1 de setiembre de 2026 — fondo del mapa sustituto.** Sin ortomosaico disponible, el visor carga
+un SVG sintético georreferenciado generado con la misma semilla que las copas. El punto de
+conexión del COG queda escrito en `MapaBase.tsx`. El criterio de rendimiento sobre COG de la
+Fase 3 **sigue sin verificar**: es el riesgo principal del proyecto.

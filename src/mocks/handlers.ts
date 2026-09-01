@@ -10,11 +10,17 @@ import type { CapacidadesExportacion } from "@/api/endpoints";
 import type {
   AreaInteres,
   Copa,
+  Ortomosaico,
   Proyecto,
   RespuestaError,
   TrabajoInferencia,
 } from "@/api/types";
-import { AREA_DE_INTERES, COPAS, PROYECTO_CON_DATOS } from "./fixtures";
+import {
+  AREA_DE_INTERES,
+  COPAS,
+  ORTOMOSAICO,
+  PROYECTO_CON_DATOS,
+} from "./fixtures";
 
 const BASE = "/api";
 
@@ -102,6 +108,13 @@ export const handlers = [
       ? HttpResponse.json(proyecto)
       : noEncontrado("El proyecto solicitado no existe.");
   }),
+
+  /* Ortomosaico — RF-02 a RF-05 */
+  http.get(`${BASE}/proyectos/:proyectoId/ortomosaico`, ({ params }) =>
+    params.proyectoId === PROYECTO_CON_DATOS
+      ? HttpResponse.json<Ortomosaico>(ORTOMOSAICO)
+      : noEncontrado("El proyecto no tiene un ortomosaico cargado."),
+  ),
 
   /* Copas — RF-13. Solo el proyecto con deteccion ejecutada tiene copas. */
   http.get(`${BASE}/proyectos/:proyectoId/copas`, ({ params }) =>

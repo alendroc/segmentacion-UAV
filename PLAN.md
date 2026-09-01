@@ -46,7 +46,7 @@ Fase 8. Las funciones de `endpoints.ts` ya existen todas y no cambian de firma.
 
 ---
 
-## Fase 2 — Generador de datos sintéticos ← **siguiente**
+## Fase 2 — Generador de datos sintéticos — **COMPLETADA**
 
 **Objetivo.** Producir copas sintéticas creíbles, reproducibles y georreferenciadas.
 
@@ -68,9 +68,32 @@ Fase 8. Las funciones de `endpoints.ts` ya existen todas y no cambian de firma.
 2. El GeoJSON abre correctamente en QGIS con la georreferenciación esperada.
 3. Prueba unitaria: el área calculada por Turf coincide con `areaM2` dentro de 0.01 m².
 
+**Resultado (1 de setiembre de 2026).** 131 copas sobre 1.2 ha en Nicoya, con 6 claros, cobertura
+del 29 % y densidad de 109 copas/ha.
+
+1. **Cumple.** Hashes idénticos en dos pasadas seguidas de los tres artefactos.
+2. **Sustituido.** No hay QGIS disponible. En su lugar hay una prueba que reproyecta el centro del
+   área de interés con proj4 y comprueba que cae en Guanacaste. Verifica lo mismo que uno miraría
+   en QGIS, pero no es el criterio literal.
+3. **No es satisfacible como está escrito, y no por culpa del generador.** `@turf/area` calcula
+   área geodésica sobre una **esfera** de radio 6 378 137 m, no sobre el elipsoide WGS84, mientras
+   que `areaM2` es área **plana** en EPSG:5367, que es lo que exige CLAUDE.md §5. Son dos
+   magnitudes distintas: la diferencia medida es de hasta 0.43 %, unos 0.2 m² en las copas
+   grandes, veinte veces la tolerancia pedida. El criterio se desdobla:
+   - **Vinculante**: `areaM2` contra una implementación plana independiente. Coincidencia exacta
+     dentro del redondeo a tres decimales. **Cumple.**
+   - **De contraste**: contra `turf.area` del polígono reproyectado, con tolerancia del 1 %.
+     **Cumple.** Sirve para confirmar la georreferenciación, no para medir área.
+
+**Hallazgo.** Se corrigió un fallo de cancelación catastrófica de punto flotante en el cálculo del
+centroide, que lo desplazaba hasta dos metros. Ver CLAUDE.md §5, "Aritmética de coordenadas".
+
+**Artefacto adicional.** `public/simulacion/lote-norte-fondo.svg`: ortomosaico sustituto generado
+con la misma semilla, para que la Fase 3 tenga fondo. Ver la Fase 3.
+
 ---
 
-## Fase 3 — Mapa base
+## Fase 3 — Mapa base — **CERRADA A MEDIAS**
 
 **Objetivo.** Navegación cartográfica real. **Es la fase de mayor riesgo técnico.**
 
@@ -96,9 +119,29 @@ Fase 8. Las funciones de `endpoints.ts` ya existen todas y no cambian de firma.
 **Si el punto 3 falla, pará y avisá antes de seguir.** Es el riesgo principal del proyecto y
 debe resolverse ahora, no en la última fase.
 
+**Resultado (1 de setiembre de 2026). La fase queda CERRADA A MEDIAS.**
+
+1. **Cumple.** La barra marca metros y la escala cambia con la resolución (1:730 a 1:716 al pasar
+   de 0.204 a 0.2 m/píxel).
+2. **Cumple.** La lectura bajo el puntero da valores del orden de 340 780 E, 1 122 150 N, con
+   rótulo de este y norte en vez de grados.
+3. **NO SE PUEDE VERIFICAR. No hay ningún ortomosaico.** Se sustituyó el fondo por un SVG
+   sintético georreferenciado y se dejó en `MapaBase.tsx` el punto de conexión de la fuente
+   `GeoTIFF` escrito y documentado. **El riesgo principal del proyecto sigue abierto**, y la
+   interfaz lo dice de forma visible en el visor.
+
+**Nota sobre la verificación en navegador automatizado.** El zoom de OpenLayers es una animación
+sobre `requestAnimationFrame`, que el navegador congela en pestañas ocultas
+(`document.visibilityState === "hidden"`). El zoom con los botones y con la rueda hay que
+comprobarlo a mano, con la pestaña al frente.
+
+**Mejora incorporada.** Una proyección registrada por proj4 llega a OpenLayers sin extensión, y
+sin ella OL no puede derivar su escalera de niveles de zoom. `geo.ts` declara el área de uso de
+CRTM05, con prueba que lo protege.
+
 ---
 
-## Fase 4 — Copas y panel de detalle
+## Fase 4 — Copas y panel de detalle ← **siguiente**
 
 **Cubre.** RF-13, RF-14, RF-15, RF-17.
 

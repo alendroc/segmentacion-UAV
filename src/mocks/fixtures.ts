@@ -7,7 +7,13 @@
  */
 import copasRaw from "./fixtures/lote-norte.geojson?raw";
 import areaRaw from "./fixtures/lote-norte-area.geojson?raw";
-import type { AreaInteres, Copa, OrigenCopa } from "../api/types";
+import type {
+  AreaInteres,
+  Copa,
+  ExtensionGeografica,
+  OrigenCopa,
+  Ortomosaico,
+} from "../api/types";
 
 interface FeatureCopa {
   geometry: GeoJSON.Polygon;
@@ -24,7 +30,7 @@ interface FeatureCopa {
 
 interface FeatureArea {
   geometry: GeoJSON.Polygon;
-  properties: { id: string; areaHa: number };
+  properties: { id: string; areaHa: number; extension: ExtensionGeografica };
 }
 
 interface Coleccion<T> {
@@ -56,4 +62,35 @@ export const AREA_DE_INTERES: AreaInteres = {
   proyectoId: PROYECTO_CON_DATOS,
   geometria: featureArea.geometry,
   areaHa: featureArea.properties.areaHa,
+};
+
+/**
+ * Ortomosaico del levantamiento simulado.
+ *
+ * Los metadatos describen el ortomosaico que existiria: COG en EPSG:5367 a
+ * 5 cm/pixel y ~1.6 GB, que es el peso del archivo real del proyecto. Lo que
+ * `urlCog` sirve, en cambio, es el fondo sintetico generado por
+ * `npm run fixtures`. La distincion queda escrita en los mensajes de
+ * validacion, que la interfaz muestra.
+ */
+export const ORTOMOSAICO: Ortomosaico = {
+  id: "om-001",
+  proyectoId: PROYECTO_CON_DATOS,
+  nombreArchivo: "lote-norte-2026-04-15.tif",
+  tamanoBytes: 1_717_986_918,
+  formato: "COG",
+  crs: "EPSG:5367",
+  resolucionCmPorPixel: 5,
+  extension: featureArea.properties.extension,
+  urlCog: "/simulacion/lote-norte-fondo.svg",
+  validacion: {
+    formato: "valido",
+    crs: "valido",
+    resolucion: "valido",
+    mensajes: [
+      "Imagen de fondo sustituta: no hay ortomosaico real disponible.",
+      "El archivo servido es una simulacion generada con la misma semilla que las copas.",
+    ],
+  },
+  subidoEn: "2026-04-15T17:14:19.000Z",
 };

@@ -159,3 +159,51 @@
     scroll-behavior: auto !important;
   }
 }
+
+/*
+ * Controles de OpenLayers. `ol/ol.css` trae su propio azul y sus propios
+ * radios: se reescriben con los tokens del tema para que el mapa no parezca
+ * pegado con cinta al resto de la interfaz. Es la unica excepcion prevista al
+ * "sin CSS suelto" de CLAUDE.md seccion 6.
+ */
+.ol-control button {
+  background-color: color-mix(in oklch, var(--background), transparent 15%);
+  color: var(--foreground);
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+}
+
+.ol-control button:hover,
+.ol-control button:focus-visible {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+  outline: none;
+}
+
+.ol-control button:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring), transparent 50%);
+}
+
+.ol-scale-bar,
+.ol-scale-line {
+  background: color-mix(in oklch, var(--background), transparent 15%);
+  border-radius: var(--radius-sm);
+  padding: 2px 4px;
+  bottom: 8px;
+  left: 8px;
+}
+
+.ol-scale-text,
+.ol-scale-singlebar-even,
+.ol-scale-singlebar-odd,
+.ol-scale-step-text {
+  color: var(--foreground);
+}
+
+.ol-scale-singlebar {
+  border-color: var(--foreground);
+}
+
+.ol-attribution {
+  display: none;
+}
