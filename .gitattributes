@@ -1,0 +1,15 @@
+# Los fixtures se comparan byte a byte: el criterio de reproducibilidad de la
+# Fase 2 se rompe si git les cambia los finales de linea al clonar en Windows.
+*.geojson text eol=lf
+*.svg     text eol=lf
+
+# Codigo y configuracion, normalizados a LF en el repositorio.
+*.ts   text eol=lf
+*.tsx  text eol=lf
+*.json text eol=lf
+*.css  text eol=lf
+*.md   text eol=lf
+*.html text eol=lf
+
+# Generado por MSW. No se edita a mano.
+public/mockServiceWorker.js linguist-vendored

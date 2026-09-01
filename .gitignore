@@ -1,2 +1,15 @@
-CLAUDE - simulacion ortomosaico.md
-Plan - simulacion ortomosaico.md
+node_modules/
+dist/
+dist-ssr/
+coverage/
+
+.env.local
+.env.*.local
+
+*.log
+npm-debug.log*
+
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea/
