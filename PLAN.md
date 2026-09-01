@@ -141,7 +141,7 @@ CRTM05, con prueba que lo protege.
 
 ---
 
-## Fase 4 — Copas y panel de detalle ← **siguiente**
+## Fase 4 — Copas y panel de detalle — **COMPLETADA**
 
 **Cubre.** RF-13, RF-14, RF-15, RF-17.
 
@@ -162,9 +162,27 @@ CRTM05, con prueba que lo protege.
 3. El conteo mostrado coincide con la cantidad de polígonos renderizados.
 4. Los valores de área y diámetro son consistentes con la geometría (verificado en prueba).
 
+**Resultado (1 de setiembre de 2026).**
+
+1. **Cumple, con una salvedad.** Los polígonos calzan sobre las copas del fondo, pero *por
+   construcción*: el fondo sintético se genera con la misma semilla y sobre las mismas
+   posiciones. No es una comprobación independiente, y no lo será hasta que haya un ortomosaico
+   real.
+2. **Cumple.** Identificador, estado, confianza, área, diámetro equivalente, número de vértices,
+   origen y centroide en CRTM05. Además, una miniatura con el recorte del ortomosaico alrededor
+   de la copa y su polígono encima: es la respuesta a "quiero ver la segmentación de este árbol".
+3. **Cumple.** 131 copas visibles, el mismo número que polígonos sirve el mock.
+4. **Cumple.** Cubierto por las pruebas de la Fase 2.
+
+**Fuera de la fase, hecho a pedido.** Migas de pan con vuelta al inicio, pasos numerados del 1 al
+4 en la cabecera y botones de anterior/siguiente en cada pantalla. Y una versión parcial de la
+pantalla de **carga**, que es de la Fase 8: muestra el fotograma real del vuelo con sus metadatos
+de EXIF y el resultado de la validación. Se adelantó porque el ejemplo de flujo de trabajo lo
+necesitaba; el resto de la Fase 8 sigue pendiente.
+
 ---
 
-## Fase 5 — Filtros y métricas agregadas
+## Fase 5 — Filtros y métricas agregadas ← **siguiente**
 
 **Cubre.** RF-16, RF-18.
 

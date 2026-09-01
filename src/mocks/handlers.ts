@@ -42,6 +42,7 @@ const PROYECTOS: Proyecto[] = [
     ortomosaicoId: "om-001",
     // Se deriva del fixture: si el generador cambia, el conteo lo acompana.
     totalCopas: COPAS.length,
+    urlMiniatura: "/simulacion/vuelo-lote-norte-mini.jpg",
   },
   {
     id: "pr-002",
@@ -54,6 +55,7 @@ const PROYECTOS: Proyecto[] = [
     estado: "procesando",
     ortomosaicoId: "om-002",
     totalCopas: null,
+    urlMiniatura: null,
   },
   {
     id: "pr-003",
@@ -66,6 +68,7 @@ const PROYECTOS: Proyecto[] = [
     estado: "error_georreferencia",
     ortomosaicoId: "om-003",
     totalCopas: null,
+    urlMiniatura: null,
   },
   {
     id: "pr-004",
@@ -77,6 +80,7 @@ const PROYECTOS: Proyecto[] = [
     estado: "sin_ortomosaico",
     ortomosaicoId: null,
     totalCopas: null,
+    urlMiniatura: null,
   },
 ];
 

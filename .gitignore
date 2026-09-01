@@ -13,3 +13,9 @@ npm-debug.log*
 .vscode/*
 !.vscode/extensions.json
 .idea/
+
+# Material fuente pesado: se conserva en local, no en el repositorio.
+datos-fuente/*.JPG
+datos-fuente/*.jpg
+datos-fuente/*.tif
+datos-fuente/*.tiff

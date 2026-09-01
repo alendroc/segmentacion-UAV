@@ -1,6 +1,6 @@
-import { AlertTriangle, FolderOpen, MapPin, TreePine } from "lucide-react";
+import { AlertTriangle, FolderOpen, ImageOff, MapPin, TreePine } from "lucide-react";
 import { Link } from "react-router-dom";
-import type { Proyecto } from "@/api/types";
+import type { EstadoProyecto, Proyecto } from "@/api/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -15,16 +15,47 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { describirEstado } from "@/features/proyectos/estadoProyecto";
 import { useProyectos } from "@/features/proyectos/useProyectos";
 import { formatearEntero, formatearFecha } from "@/lib/formato";
+import { rutaDePaso, type ClavePaso } from "@/lib/pasos";
+
+/** Donde tiene sentido entrar segun donde quedo el proyecto. */
+function pasoDeEntrada(estado: EstadoProyecto): ClavePaso {
+  switch (estado) {
+    case "sin_ortomosaico":
+    case "error_georreferencia":
+      return "carga";
+    case "ortomosaico_cargado":
+    case "procesando":
+      return "procesamiento";
+    case "completado":
+      return "visor";
+  }
+}
 
 function TarjetaProyecto({ proyecto }: { proyecto: Proyecto }) {
   const estado = describirEstado(proyecto.estado);
+  const destino = rutaDePaso(proyecto.id, pasoDeEntrada(proyecto.estado));
 
   return (
-    <Card className="transition-colors hover:border-primary/40">
+    <Card className="overflow-hidden pt-0 transition-colors hover:border-primary/40">
+      <div className="aspect-[3/2] w-full overflow-hidden border-b bg-muted">
+        {proyecto.urlMiniatura ? (
+          <img
+            src={proyecto.urlMiniatura}
+            alt=""
+            className="size-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <div className="flex size-full items-center justify-center">
+            <ImageOff aria-hidden className="size-6 text-muted-foreground/50" />
+          </div>
+        )}
+      </div>
+
       <CardHeader>
         <CardTitle className="flex items-start justify-between gap-2">
           <Link
-            to={`/proyectos/${proyecto.id}/visor`}
+            to={destino}
             className="rounded-sm outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             {proyecto.nombre}
@@ -102,7 +133,7 @@ export function ProyectosPage() {
         </h1>
         <p className="text-sm text-muted-foreground">
           Levantamientos con vehiculo aereo no tripulado en el bosque tropical
-          seco de la Region Chorotega.
+          seco de la Region Chorotega. Abra uno para recorrer el flujo completo.
         </p>
       </header>
 

@@ -70,6 +70,8 @@ export interface Proyecto {
   ortomosaicoId: string | null;
   /** null mientras no se haya ejecutado la deteccion. */
   totalCopas: number | null;
+  /** Miniatura para la lista de proyectos. */
+  urlMiniatura: string | null;
 }
 
 export interface NuevoProyecto {
@@ -92,6 +94,25 @@ export interface ValidacionOrtomosaico {
   mensajes: string[];
 }
 
+/**
+ * Metadatos del vuelo, leidos del EXIF y el XMP de los fotogramas originales.
+ * Es lo que permite auditar la georreferenciacion sin abrir los archivos.
+ */
+export interface MetadatosVuelo {
+  camara: string;
+  distanciaFocalMm: number;
+  /** Altura sobre el terreno, en metros. */
+  alturaVueloM: number;
+  latitud: number;
+  longitud: number;
+  gsdCmPorPixel: number;
+  /** Huella en el suelo de un fotograma: [ancho, alto] en metros. */
+  huellaM: [number, number];
+  /** Fotograma de muestra del vuelo. */
+  urlFotograma: string;
+  urlMiniatura: string;
+}
+
 export interface Ortomosaico {
   id: string;
   proyectoId: string;
@@ -105,6 +126,7 @@ export interface Ortomosaico {
   /** URL del COG servido con soporte de rangos HTTP. */
   urlCog: string;
   validacion: ValidacionOrtomosaico;
+  vuelo: MetadatosVuelo | null;
   subidoEn: string; // ISO 8601
 }
 

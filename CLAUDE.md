@@ -100,9 +100,17 @@ src/
     carga/            RF-02 a RF-05
     procesamiento/    RF-06 a RF-12
     visor/            RF-13 a RF-22
+      estilosCopa.ts  Estado de una copa y su apariencia. Sin React
+      PanelDetalle.tsx
+      MiniaturaCopa.tsx  Recorte del ortomosaico alrededor de una copa
     exportacion/      RF-23 a RF-25
   components/
+    layout/
+      Shell.tsx       Cabecera, migas de pan y pasos del flujo
+      MigasDePan.tsx  Camino de vuelta al inicio desde cualquier punto
+      AccionesDePaso.tsx  Anterior / siguiente / salir al inicio
     mapa/
+      contextoMapa.ts Instancia de OL compartida con las capas hijas
       MapaBase.tsx    Instancia de OL, proyección, capa de fondo
       CapaCopas.tsx   Capa vectorial y estilos por estado
       useDibujo.ts    Draw / Modify / Snap
@@ -116,6 +124,8 @@ src/
     utils.ts          Helper `cn()` que crea shadcn. No lo borrés: lo usan todos los componentes
     geometriaPlana.ts Área, diámetro, centroide. SIN IMPORTS. Ver la nota de abajo
     geo.ts            Registro de EPSG:5367, transformaciones de CRS. Reexporta geometriaPlana
+    colores.ts        Puente entre los tokens del tema y el lienzo del mapa
+    pasos.ts          El flujo de trabajo, declarado una sola vez
     formato.ts        Formateo de números y coordenadas
   test/
     setup.ts          Arranque de Vitest. Registra MSW para TODAS las pruebas
@@ -130,6 +140,11 @@ siquiera los archivos de prueba de `features/` necesitan importar `mocks/` y la 
 verifica con un solo `grep`.
 
 `scripts/generar-fixtures.ts` vive fuera de `src/` y se ejecuta con `npm run fixtures`.
+
+`datos-fuente/` guarda el material original del vuelo —fotogramas de la cámara, y en su día el
+ortomosaico— **fuera de `public/`**, para que no se copie al build, y fuera del repositorio por
+peso. Ver `datos-fuente/LEEME.md`. Lo que la aplicación sirve son las versiones reducidas de
+`public/simulacion/`.
 
 **Por qué `geometriaPlana.ts` está separado de `geo.ts`.** El script de fixtures corre bajo Node
 plano y no puede cargar proj4 ni OpenLayers. La matemática pura, que no necesita ninguna de las
@@ -181,6 +196,10 @@ informe.
 vive alrededor de (340 000, 1 122 000): los productos cruzados rondan 3.8·10¹¹ y la diferencia se
 pierde en la precisión del `double`. Sin esa traslación, el centroide llega a caer metros fuera
 del polígono. `geometriaPlana.ts` ya lo hace; cualquier función nueva tiene que hacerlo también.
+
+**Umbral de confianza baja.** 0.70. El generador separa las dos poblaciones en 0.62 y 0.72, así
+que ese valor las distingue sin ambigüedad. Vive en `features/visor/estilosCopa.ts` y no se
+duplica.
 
 **Filtros.** Los filtros de confianza y área **ocultan**, no borran. El conteo visible se
 recalcula; el dato persiste.
@@ -333,3 +352,9 @@ resultado de la Fase 2 en `PLAN.md`.
 un SVG sintético georreferenciado generado con la misma semilla que las copas. El punto de
 conexión del COG queda escrito en `MapaBase.tsx`. El criterio de rendimiento sobre COG de la
 Fase 3 **sigue sin verificar**: es el riesgo principal del proyecto.
+
+**1 de setiembre de 2026 — fotograma real del vuelo.** Se incorporó `DJI_20260415111419_0054.JPG`,
+una toma nadir real de Guanacaste con Zenmuse P1. Vive en `datos-fuente/`, fuera de `public/` y
+fuera del repositorio: 25 MB en `public/` acababan copiados al build. La aplicación sirve dos
+versiones reducidas desde `public/simulacion/`. **No es un ortomosaico**: es un fotograma suelto
+de 0.19 ha, y las copas sintéticas no corresponden a sus árboles. Ver `datos-fuente/LEEME.md`.

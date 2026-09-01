@@ -5,7 +5,8 @@ import ImageLayer from "ol/layer/Image";
 import Map from "ol/Map";
 import ImageStatic from "ol/source/ImageStatic";
 import View from "ol/View";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { ContextoMapa } from "@/components/mapa/contextoMapa";
 import { proyeccionCrtm05, type Posicion } from "@/lib/geo";
 import { formatearCoordenada } from "@/lib/formato";
 import { cn } from "@/lib/utils";
@@ -16,6 +17,8 @@ export interface PropsMapaBase {
   /** Extension del ortomosaico en EPSG:5367: [minX, minY, maxX, maxY]. */
   extension: [number, number, number, number];
   className?: string;
+  /** Capas que necesitan la instancia del mapa, via `useMapa()`. */
+  children?: ReactNode;
 }
 
 /**
@@ -37,11 +40,17 @@ export interface PropsMapaBase {
  *
  * El resto del componente no cambia. El criterio 3 de la Fase 3 —navegar un
  * COG de 200 MB con fluidez— sigue SIN VERIFICAR hasta que haya un ortomosaico
- * real: es el riesgo principal del proyecto y no se puede dar por resuelto.
+ * real: es el riesgo principal del proyecto.
  */
-export function MapaBase({ urlImagen, extension, className }: PropsMapaBase) {
+export function MapaBase({
+  urlImagen,
+  extension,
+  className,
+  children,
+}: PropsMapaBase) {
   const contenedor = useRef<HTMLDivElement>(null);
   const [coordenada, setCoordenada] = useState<Posicion | null>(null);
+  const [mapa, setMapa] = useState<Map | null>(null);
   const claveExtension = extension.join(",");
 
   useEffect(() => {
@@ -71,7 +80,7 @@ export function MapaBase({ urlImagen, extension, className }: PropsMapaBase) {
       constrainResolution: false,
     });
 
-    const mapa = new Map({
+    const instancia = new Map({
       target: elemento,
       layers: [
         new ImageLayer({
@@ -101,14 +110,17 @@ export function MapaBase({ urlImagen, extension, className }: PropsMapaBase) {
         setCoordenada([evento.coordinate[0], evento.coordinate[1]]);
       });
     };
-    mapa.on("pointermove", alMover);
+    instancia.on("pointermove", alMover);
     const alSalir = () => setCoordenada(null);
     elemento.addEventListener("pointerleave", alSalir);
 
+    setMapa(instancia);
+
     return () => {
+      setMapa(null);
       elemento.removeEventListener("pointerleave", alSalir);
-      mapa.setTarget(undefined);
-      mapa.dispose();
+      instancia.setTarget(undefined);
+      instancia.dispose();
     };
   }, [urlImagen, claveExtension]);
 
@@ -121,6 +133,7 @@ export function MapaBase({ urlImagen, extension, className }: PropsMapaBase) {
         aria-label="Mapa del ortomosaico. Use las flechas para desplazarse y las teclas mas y menos para acercar."
         className="size-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
       />
+      <ContextoMapa.Provider value={mapa}>{children}</ContextoMapa.Provider>
       <p
         aria-live="off"
         className="pointer-events-none absolute right-2 bottom-2 rounded-md bg-background/85 px-2 py-1 font-mono text-xs text-muted-foreground tabular-nums backdrop-blur"

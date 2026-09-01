@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup — Segmentación de copas UAV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#101A16;
+  --chrome:#FBFCFA;
+  --panel:#EFF2EC;
+  --panel-2:#E4E9E1;
+  --line:#D2DACD;
+  --text:#1B2620;
+  --dim:#6C7C71;
+  --canvas:#0B1310;
+  --signal:#00CFBB;
+  --warn:#F0A527;
+  --danger:#DB4A3C;
+  --plot:#7C6CFF;
+  --r:3px;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  font-family:var(--sans);
+  color:var(--text);
+  background:var(--panel-2);
+  font-size:13px;
+  -webkit-font-smoothing:antialiased;
+  display:flex;flex-direction:column;
+}
+.lbl{
+  font-family:var(--cond);
+  text-transform:uppercase;
+  letter-spacing:.11em;
+  font-weight:600;
+  font-size:10px;
+  color:var(--dim);
+}
+.mono{font-family:var(--mono)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+/* ---- barra de mockup (no es parte del producto) ---- */
+.mockbar{
+  background:var(--ink);color:#B9C7BE;
+  display:flex;align-items:center;gap:18px;
+  padding:0 14px;height:34px;flex:0 0 auto;
+  border-bottom:1px solid #000;
+}
+.mockbar .tag{
+  font-family:var(--cond);text-transform:uppercase;letter-spacing:.14em;
+  font-size:9.5px;color:#5E7268;border:1px solid #2A3A32;padding:3px 6px;
+}
+.mockbar nav{display:flex;gap:2px}
+.mockbar nav button{
+  background:none;border:0;padding:7px 11px;
+  font-family:var(--cond);font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;color:#7E9188;border-bottom:2px solid transparent;
+}
+.mockbar nav button:hover{color:#DCE7E0}
+.mockbar nav button[aria-current="true"]{color:#fff;border-bottom-color:var(--signal)}
+
+/* ---- cabecera del producto ---- */
+.topbar{
+  flex:0 0 auto;background:var(--chrome);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:16px;padding:0 16px;height:52px;
+}
+.brand{display:flex;align-items:center;gap:9px;padding-right:16px;border-right:1px solid var(--line);height:100%}
+.brand .mark{width:22px;height:22px;border-radius:50%;background:
+  radial-gradient(circle at 32% 32%, #5FD6A8 0 22%, transparent 23%),
+  radial-gradient(circle at 68% 45%, #2FA37A 0 26%, transparent 27%),
+  radial-gradient(circle at 45% 72%, #1C6E56 0 24%, transparent 25%),
+  var(--ink);}
+.brand b{font-family:var(--cond);font-size:14px;letter-spacing:.02em}
+.crumb{display:flex;align-items:baseline;gap:8px}
+.crumb .proj{font-family:var(--cond);font-size:15px;font-weight:600}
+.crumb .sub{color:var(--dim);font-size:11.5px}
+.meta{display:flex;gap:0;margin-left:auto;align-items:center}
+.meta .cell{padding:0 14px;border-left:1px solid var(--line);text-align:right}
+.meta .cell .v{font-family:var(--mono);font-size:12px;display:block;margin-top:2px}
+.btn{
+  border:1px solid var(--line);background:var(--chrome);border-radius:var(--r);
+  padding:7px 12px;font-family:var(--cond);font-size:12px;letter-spacing:.04em;
+}
+.btn:hover{background:var(--panel)}
+.btn-primary{background:var(--ink);color:#EAF2ED;border-color:var(--ink)}
+.btn-primary:hover{background:#1D302A}
+.topbar .btn{margin-left:14px}
+
+/* ---- layout de pantallas ---- */
+.screen{display:none;flex:1 1 auto;min-height:0}
+.screen.on{display:flex;flex-direction:column}
+.work{display:flex;flex:1 1 auto;min-height:0}
+
+/* ---- paneles laterales ---- */
+.side{
+  width:250px;flex:0 0 250px;background:var(--chrome);
+  border-right:1px solid var(--line);overflow-y:auto;
+}
+.side.right{border-right:0;border-left:1px solid var(--line);width:288px;flex-basis:288px}
+.block{padding:14px 14px 16px;border-bottom:1px solid var(--line)}
+.block > .lbl{display:block;margin-bottom:10px}
+
+.layer{display:flex;align-items:center;gap:9px;padding:5px 0}
+.layer .sw{
+  width:15px;height:15px;border:1px solid var(--line);border-radius:2px;
+  background:var(--panel);flex:0 0 auto;display:grid;place-items:center;
+}
+.layer[data-on="1"] .sw{background:var(--ink);border-color:var(--ink)}
+.layer[data-on="1"] .sw::after{content:"";width:7px;height:4px;border-left:1.6px solid #fff;border-bottom:1.6px solid #fff;transform:rotate(-45deg) translateY(-1px)}
+.layer .nm{flex:1 1 auto;font-size:12.5px}
+.layer .chip{width:11px;height:11px;border-radius:2px}
+.layer:hover .nm{color:#000}
+
+input[type=range]{width:100%;accent-color:#1B2620;margin:6px 0 2px}
+.rowv{display:flex;justify-content:space-between;align-items:baseline}
+.rowv .n{font-family:var(--mono);font-size:12px}
+.hint{color:var(--dim);font-size:11px;line-height:1.45;margin:6px 0 0}
+
+/* ---- lienzo ---- */
+.canvaswrap{flex:1 1 auto;position:relative;background:var(--canvas);min-width:0;overflow:hidden}
+#map{position:absolute;inset:0;width:100%;height:100%;display:block}
+.overlay{position:absolute;pointer-events:none;font-family:var(--mono);font-size:10.5px;color:#CFE3D8}
+.ov-tl{top:12px;left:12px;display:flex;gap:6px;pointer-events:auto}
+.tool{
+  background:rgba(11,19,16,.82);border:1px solid rgba(255,255,255,.14);
+  color:#CFE3D8;width:30px;height:30px;border-radius:var(--r);
+  display:grid;place-items:center;font-size:13px;
+}
+.tool:hover{background:rgba(255,255,255,.12)}
+.tool.act{background:var(--signal);color:#062018;border-color:var(--signal)}
+.ov-bl{bottom:12px;left:12px;display:flex;align-items:flex-end;gap:14px}
+.scalebar{width:250px}
+.scalebar .bar{height:5px;border:1px solid #CFE3D8;border-top:0;display:flex}
+.scalebar .bar i{flex:1;height:100%}
+.scalebar .bar i:nth-child(odd){background:#CFE3D8}
+.scalebar span{display:block;text-align:right;margin-bottom:2px}
+.north{text-align:center;line-height:1.1}
+.north b{display:block;font-size:15px}
+.ov-br{bottom:12px;right:12px;text-align:right;background:rgba(11,19,16,.8);padding:5px 8px;border-radius:var(--r)}
+.ov-tr{top:12px;right:12px;background:rgba(11,19,16,.82);padding:8px 10px;border-radius:var(--r);min-width:150px}
+.ov-tr .k{display:flex;justify-content:space-between;gap:16px;padding:1.5px 0}
+.ov-tr .k b{font-weight:500}
+.legend{display:flex;align-items:center;gap:6px;padding:2px 0}
+.legend i{width:9px;height:9px;border-radius:2px;display:block}
+
+/* ---- panel de detalle ---- */
+.det-head{padding:14px;border-bottom:1px solid var(--line)}
+.det-head h3{margin:4px 0 0;font-family:var(--cond);font-size:17px;font-weight:600}
+.badge{
+  display:inline-block;font-family:var(--cond);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;padding:3px 6px;border-radius:2px;
+}
+.b-ok{background:rgba(0,207,187,.16);color:#0A7568}
+.b-low{background:rgba(240,165,39,.18);color:#8A5C05}
+.b-no{background:rgba(219,74,60,.15);color:#9E2E23}
+.kv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dotted var(--line)}
+.kv:last-child{border-bottom:0}
+.kv .k{color:var(--dim)}
+.kv .v{font-family:var(--mono);font-size:12px}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px}
+.acts .btn{width:100%;text-align:center}
+.acts .wide{grid-column:1/-1}
+.thumb{height:96px;border-radius:var(--r);border:1px solid var(--line);background:var(--canvas);overflow:hidden;margin-bottom:10px}
+.thumb svg{width:100%;height:100%;display:block}
+
+/* ---- pie de resumen ---- */
+.foot{
+  flex:0 0 auto;background:var(--chrome);border-top:1px solid var(--line);
+  display:flex;align-items:center;height:46px;padding:0 16px;gap:0;
+}
+.foot .cell{padding:0 18px;border-right:1px solid var(--line)}
+.foot .cell:first-child{padding-left:0}
+.foot .cell .v{font-family:var(--mono);font-size:13px;display:block;margin-top:1px}
+.foot .grow{margin-left:auto;border:0;color:var(--dim);font-size:11.5px}
+
+/* ---- pantallas de lista / formulario ---- */
+.pad{padding:26px 30px;overflow-y:auto;flex:1 1 auto;background:var(--panel-2)}
+.pad h2{font-family:var(--cond);font-size:22px;font-weight:600;margin:0 0 3px}
+.pad .sub{color:var(--dim);margin:0 0 22px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.card{background:var(--chrome);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.card .pic{height:120px;background:var(--canvas)}
+.card .pic svg{width:100%;height:100%;display:block}
+.card .body{padding:11px 12px 13px}
+.card h4{margin:0 0 2px;font-family:var(--cond);font-size:14.5px;font-weight:600}
+.card .m{color:var(--dim);font-size:11.5px;font-family:var(--mono)}
+.card .st{margin-top:9px;display:flex;justify-content:space-between;align-items:center}
+.card.new{display:grid;place-items:center;min-height:210px;border-style:dashed;background:transparent;color:var(--dim)}
+.card.new:hover{border-color:var(--ink);color:var(--text)}
+
+.form{max-width:660px;background:var(--chrome);border:1px solid var(--line);border-radius:var(--r)}
+.form .sec{padding:16px 18px;border-bottom:1px solid var(--line)}
+.form .sec:last-child{border-bottom:0}
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+.field > label{display:block;margin-bottom:5px;font-size:12.5px;font-weight:500}
+.control{
+  width:100%;border:1px solid var(--line);border-radius:var(--r);
+  background:var(--panel);padding:8px 10px;font-family:var(--mono);font-size:12px;
+}
+.drop{
+  border:1px dashed var(--line);border-radius:var(--r);padding:22px;text-align:center;
+  background:var(--panel);color:var(--dim);
+}
+.drop b{display:block;color:var(--text);font-family:var(--cond);font-size:14px;margin-bottom:3px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.log{background:var(--ink);color:#9FB6A9;font-family:var(--mono);font-size:11.5px;padding:12px 14px;border-radius:var(--r);line-height:1.7}
+.log b{color:var(--signal);font-weight:400}
+.bar{height:5px;background:var(--panel-2);border-radius:99px;overflow:hidden;margin:8px 0 5px}
+.bar i{display:block;height:100%;background:var(--ink)}
+
+/* ---- métricas ---- */
+.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.stat{background:var(--chrome);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.stat .n{font-family:var(--mono);font-size:26px;letter-spacing:-.02em;margin-top:6px;display:block}
+.stat .d{color:var(--dim);font-size:11px;margin-top:3px}
+.panelbox{background:var(--chrome);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;margin-bottom:14px}
+.panelbox h3{font-family:var(--cond);font-size:14px;font-weight:600;margin:0 0 12px;text-transform:uppercase;letter-spacing:.08em}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{font-family:var(--cond);text-transform:uppercase;letter-spacing:.09em;font-size:10px;color:var(--dim);text-align:left;padding:0 8px 7px;border-bottom:1px solid var(--line)}
+td{padding:8px;border-bottom:1px solid var(--panel-2);font-family:var(--mono);font-size:12px}
+td:first-child{font-family:var(--sans)}
+.two-col{display:grid;grid-template-columns:1.25fr 1fr;gap:14px;align-items:start}
+.exp{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+
+@media (prefers-reduced-motion:no-preference){
+  .poly{transition:opacity .18s ease}
+}
+@media (max-width:900px){
+  .side,.side.right{display:none}
+  .mgrid{grid-template-columns:repeat(2,1fr)}
+  .two-col{grid-template-columns:1fr}
+  .meta .cell:nth-child(-n+2){display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="mockbar">
+  <span class="tag">Mockup · sin funcionalidad real</span>
+  <nav>
+    <button data-go="proyectos">1 · Proyectos</button>
+    <button data-go="procesar">2 · Nuevo procesamiento</button>
+    <button data-go="visor" aria-current="true">3 · Visor de resultados</button>
+    <button data-go="validacion">4 · Validación y exportación</button>
+  </nav>
+</div>
+
+<!-- ============ 1. PROYECTOS ============ -->
+<section class="screen" id="s-proyectos">
+  <header class="topbar">
+    <div class="brand"><span class="mark"></span><b>Dosel</b></div>
+    <div class="crumb"><span class="proj">Proyectos</span><span class="sub">4 vuelos · 2 en proceso</span></div>
+    <div class="meta"><button class="btn btn-primary" data-go="procesar">Nuevo procesamiento</button></div>
+  </header>
+  <div class="pad">
+    <h2>Vuelos</h2>
+    <p class="sub">Cada vuelo agrupa un ortomosaico, sus detecciones y las correcciones hechas sobre ellas.</p>
+    <div class="grid" id="projgrid"></div>
+  </div>
+</section>
+
+<!-- ============ 2. PROCESAR ============ -->
+<section class="screen" id="s-procesar">
+  <header class="topbar">
+    <div class="brand"><span class="mark"></span><b>Dosel</b></div>
+    <div class="crumb"><span class="proj">Nuevo procesamiento</span><span class="sub">Paso 2 de 3 · Parámetros</span></div>
+    <div class="meta"><button class="btn" data-go="proyectos">Cancelar</button><button class="btn btn-primary" data-go="visor">Ejecutar segmentación</button></div>
+  </header>
+  <div class="pad">
+    <h2>Cargar ortomosaico y configurar</h2>
+    <p class="sub">El sistema recorta la imagen en mosaicos, corre el modelo sobre cada uno y une los polígonos que quedan partidos en los bordes.</p>
+    <div class="form">
+      <div class="sec">
+        <div class="field">
+          <label>Ortomosaico</label>
+          <div class="drop"><b>Arrastre un GeoTIFF aquí</b>Formatos: .tif, .tiff con georreferencia · máx. 8 GB</div>
+        </div>
+        <div class="two">
+          <div class="field"><label>Sistema de coordenadas detectado</label><input class="control" value="EPSG:5367 — CR05 / CRTM05" readonly></div>
+          <div class="field"><label>Resolución (GSD)</label><input class="control" value="2.8 cm/px" readonly></div>
+        </div>
+        <div class="field"><label>Modelo de superficie del dosel (CHM) — opcional</label><input class="control" value="cnh_lote_norte_2026.tif" readonly></div>
+        <p class="hint">Sin CHM el sistema no puede estimar altura; el resto del análisis funciona igual.</p>
+      </div>
+      <div class="sec">
+        <div class="two">
+          <div class="field"><label>Modelo</label>
+            <select class="control"><option>Mask R-CNN · ResNet-50 FPN (afinado)</option><option>U-Net + watershed</option><option>YOLOv8-seg</option><option>SAM guiado por máximos locales</option></select></div>
+          <div class="field"><label>Pesos</label><input class="control" value="copas_v3_2026-05-18.pth" readonly></div>
+        </div>
+        <div class="two">
+          <div class="field"><label>Tamaño de mosaico (px)</label><input class="control" value="1024"></div>
+          <div class="field"><label>Traslape entre mosaicos (%)</label><input class="control" value="20"></div>
+        </div>
+        <div class="two">
+          <div class="field"><label>Umbral de confianza inicial</label><input class="control" value="0.50"></div>
+          <div class="field"><label>Área mínima de copa (m²)</label><input class="control" value="1.5"></div>
+        </div>
+        <p class="hint">El umbral se puede mover después sobre los resultados sin volver a procesar.</p>
+      </div>
+      <div class="sec">
+        <span class="lbl">Ejecución en curso</span>
+        <div class="bar"><i style="width:64%"></i></div>
+        <div class="rowv"><span class="hint" style="margin:0">Mosaico 118 de 184</span><span class="n">64 % · ~3 min restantes</span></div>
+        <div class="log" style="margin-top:12px">
+          <b>10:42:03</b> Ortomosaico cargado · 14 208 × 11 640 px · 12.4 ha<br>
+          <b>10:42:11</b> Recorte en 184 mosaicos de 1024 px (traslape 20 %)<br>
+          <b>10:43:56</b> Inferencia en GPU · 1.9 mosaicos/s<br>
+          <b>10:47:20</b> 1 093 instancias detectadas · uniendo bordes…
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. VISOR ============ -->
+<section class="screen on" id="s-visor">
+  <header class="topbar">
+    <div class="brand"><span class="mark"></span><b>Dosel</b></div>
+    <div class="crumb"><span class="proj">Lote Norte — vuelo 12 may 2026</span><span class="sub">Mask R-CNN · copas_v3</span></div>
+    <div class="meta">
+      <div class="cell"><span class="lbl">CRS</span><span class="v">EPSG:5367</span></div>
+      <div class="cell"><span class="lbl">GSD</span><span class="v">2.8 cm/px</span></div>
+      <div class="cell"><span class="lbl">Área</span><span class="v">12.4 ha</span></div>
+      <button class="btn" data-go="validacion">Validación</button>
+      <button class="btn btn-primary" data-go="validacion">Exportar</button>
+    </div>
+  </header>
+
+  <div class="work">
+    <aside class="side">
+      <div class="block">
+        <span class="lbl">Capas</span>
+        <div class="layer" data-on="1" data-layer="orto"><span class="sw"></span><span class="nm">Ortomosaico RGB</span></div>
+        <div class="layer" data-on="0" data-layer="chm"><span class="sw"></span><span class="nm">Altura (CHM)</span></div>
+        <div class="layer" data-on="1" data-layer="copas"><span class="sw"></span><span class="nm">Copas detectadas</span><span class="chip" style="background:var(--signal)"></span></div>
+        <div class="layer" data-on="1" data-layer="parcelas"><span class="sw"></span><span class="nm">Parcelas de campo</span><span class="chip" style="background:var(--plot)"></span></div>
+        <div style="margin-top:12px">
+          <span class="lbl">Opacidad de copas</span>
+          <input type="range" id="op" min="10" max="100" value="85">
+        </div>
+      </div>
+
+      <div class="block">
+        <span class="lbl">Filtros</span>
+        <div class="rowv"><label for="conf" style="font-size:12.5px">Confianza mínima</label><span class="n" id="confv">0.50</span></div>
+        <input type="range" id="conf" min="30" max="99" value="50">
+        <div class="rowv" style="margin-top:10px"><label for="amin" style="font-size:12.5px">Área mínima</label><span class="n" id="aminv">1.5 m²</span></div>
+        <input type="range" id="amin" min="0" max="120" value="15">
+        <p class="hint">Mover el umbral no vuelve a correr el modelo: solo filtra lo ya detectado.</p>
+      </div>
+
+      <div class="block">
+        <span class="lbl">Revisión</span>
+        <div class="rowv" style="padding:4px 0"><span>Confirmadas</span><span class="n" id="n-ok">—</span></div>
+        <div class="rowv" style="padding:4px 0"><span>Por revisar</span><span class="n" id="n-low">—</span></div>
+        <div class="rowv" style="padding:4px 0"><span>Descartadas</span><span class="n" id="n-no">—</span></div>
+        <div class="rowv" style="padding:4px 0"><span>Agregadas a mano</span><span class="n">14</span></div>
+      </div>
+    </aside>
+
+    <div class="canvaswrap">
+      <svg id="map" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Ortomosaico con copas segmentadas"></svg>
+
+      <div class="overlay ov-tl">
+        <button class="tool act" title="Navegar">✥</button>
+        <button class="tool" title="Seleccionar copa">▣</button>
+        <button class="tool" title="Dibujar copa nueva">✚</button>
+        <button class="tool" title="Dividir copa unida">◫</button>
+        <button class="tool" title="Unir copas partidas">◧</button>
+        <button class="tool" title="Descartar detección">✕</button>
+      </div>
+
+      <div class="overlay ov-tr">
+        <div class="lbl" style="color:#8FA79A;margin-bottom:5px">Simbología</div>
+        <div class="legend"><i style="background:var(--signal)"></i><span>Confirmada</span></div>
+        <div class="legend"><i style="background:var(--warn)"></i><span>Confianza baja</span></div>
+        <div class="legend"><i style="background:var(--danger)"></i><span>Descartada</span></div>
+        <div class="legend"><i style="background:var(--plot)"></i><span>Parcela de campo</span></div>
+      </div>
+
+      <div class="overlay ov-bl">
+        <div class="scalebar"><span>20 m</span><div class="bar"><i></i><i></i><i></i><i></i></div></div>
+        <div class="north"><b>▲</b>N</div>
+      </div>
+
+      <div class="overlay ov-br" id="coords">9.9385° N &nbsp; 84.0912° O &nbsp;|&nbsp; 1:400</div>
+    </div>
+
+    <aside class="side right" id="detalle">
+      <div class="det-head">
+        <span class="lbl">Copa seleccionada</span>
+        <h3 id="d-id">—</h3>
+        <div style="margin-top:7px"><span class="badge b-ok" id="d-badge">Confirmada</span></div>
+      </div>
+      <div class="block">
+        <div class="thumb" id="d-thumb"></div>
+        <div class="kv"><span class="k">Confianza del modelo</span><span class="v" id="d-conf">—</span></div>
+        <div class="kv"><span class="k">Área de copa</span><span class="v" id="d-area">—</span></div>
+        <div class="kv"><span class="k">Diámetro medio</span><span class="v" id="d-diam">—</span></div>
+        <div class="kv"><span class="k">Altura (CHM)</span><span class="v" id="d-alt">—</span></div>
+        <div class="kv"><span class="k">Vértices del polígono</span><span class="v" id="d-vert">—</span></div>
+        <div class="kv"><span class="k">Centroide</span><span class="v mono" id="d-cent" style="font-size:11px">—</span></div>
+      </div>
+      <div class="block">
+        <span class="lbl">Especie sugerida <em style="text-transform:none;letter-spacing:0;font-weight:400">(opcional)</em></span>
+        <select class="control" id="d-esp"><option>Sin clasificar</option></select>
+        <p class="hint">Módulo aparte del de segmentación. Si su tesis no lo cubre, quite este bloque del mockup.</p>
+      </div>
+      <div class="block">
+        <span class="lbl">Acciones</span>
+        <div class="acts">
+          <button class="btn">Confirmar</button>
+          <button class="btn">Descartar</button>
+          <button class="btn">Editar polígono</button>
+          <button class="btn">Dividir</button>
+          <button class="btn wide">Marcar para revisión en campo</button>
+        </div>
+      </div>
+      <div class="block" style="border-bottom:0">
+        <span class="lbl">Historial</span>
+        <p class="hint" style="margin-top:8px">Detectada por el modelo · 12 may 10:47<br>Polígono editado por M. Rojas · 13 may 09:12</p>
+      </div>
+    </aside>
+  </div>
+
+  <div class="foot">
+    <div class="cell"><span class="lbl">Copas visibles</span><span class="v" id="f-n">—</span></div>
+    <div class="cell"><span class="lbl">Densidad</span><span class="v" id="f-dens">—</span></div>
+    <div class="cell"><span class="lbl">Cobertura de dosel</span><span class="v" id="f-cob">—</span></div>
+    <div class="cell"><span class="lbl">Diámetro medio</span><span class="v" id="f-dm">—</span></div>
+    <div class="cell"><span class="lbl">Revisión</span><span class="v" id="f-rev">—</span></div>
+    <div class="cell grow">Cambios guardados automáticamente · última edición hace 2 min</div>
+  </div>
+</section>
+
+<!-- ============ 4. VALIDACIÓN ============ -->
+<section class="screen" id="s-validacion">
+  <header class="topbar">
+    <div class="brand"><span class="mark"></span><b>Dosel</b></div>
+    <div class="crumb"><span class="proj">Validación y exportación</span><span class="sub">Lote Norte — vuelo 12 may 2026</span></div>
+    <div class="meta"><button class="btn" data-go="visor">Volver al visor</button><button class="btn btn-primary">Generar reporte PDF</button></div>
+  </header>
+  <div class="pad">
+    <h2>Desempeño contra parcelas de campo</h2>
+    <p class="sub">6 parcelas de 20 × 20 m medidas en campo · 214 árboles de referencia · umbral de emparejamiento IoU ≥ 0.50</p>
+
+    <div class="mgrid">
+      <div class="stat"><span class="lbl">Precisión</span><span class="n">0.91</span><span class="d">de cada 100 detecciones, 91 son árboles reales</span></div>
+      <div class="stat"><span class="lbl">Exhaustividad</span><span class="n">0.86</span><span class="d">detecta 86 de cada 100 árboles medidos</span></div>
+      <div class="stat"><span class="lbl">F1</span><span class="n">0.88</span><span class="d">balance entre las dos anteriores</span></div>
+      <div class="stat"><span class="lbl">IoU medio</span><span class="n">0.78</span><span class="d">qué tan bien calza el polígono con la copa real</span></div>
+    </div>
+
+    <div class="two-col">
+      <div class="panelbox">
+        <h3>Resultado por parcela</h3>
+        <table>
+          <thead><tr><th>Parcela</th><th>Campo</th><th>Detectadas</th><th>Correctas</th><th>Falsos +</th><th>Omitidas</th><th>IoU</th></tr></thead>
+          <tbody>
+            <tr><td>P-01 · borde de camino</td><td>38</td><td>40</td><td>36</td><td>4</td><td>2</td><td>0.81</td></tr>
+            <tr><td>P-02 · dosel cerrado</td><td>45</td><td>39</td><td>36</td><td>3</td><td>9</td><td>0.71</td></tr>
+            <tr><td>P-03 · regeneración</td><td>29</td><td>31</td><td>27</td><td>4</td><td>2</td><td>0.76</td></tr>
+            <tr><td>P-04 · plantación</td><td>41</td><td>42</td><td>40</td><td>2</td><td>1</td><td>0.86</td></tr>
+            <tr><td>P-05 · ladera</td><td>33</td><td>30</td><td>28</td><td>2</td><td>5</td><td>0.75</td></tr>
+            <tr><td>P-06 · claro</td><td>28</td><td>29</td><td>27</td><td>2</td><td>1</td><td>0.83</td></tr>
+          </tbody>
+        </table>
+        <p class="hint">P-02 concentra los errores: en dosel cerrado el modelo fusiona copas contiguas. Es el hallazgo que conviene discutir en el capítulo de resultados.</p>
+      </div>
+
+      <div>
+        <div class="panelbox">
+          <h3>Distribución de diámetros</h3>
+          <svg viewBox="0 0 320 150" style="width:100%;height:auto" role="img" aria-label="Histograma de diámetros de copa">
+            <g id="hist"></g>
+            <line x1="30" y1="122" x2="312" y2="122" stroke="#D2DACD"></line>
+            <text x="30" y="140" font-family="IBM Plex Mono" font-size="9" fill="#6C7C71">2 m</text>
+            <text x="280" y="140" font-family="IBM Plex Mono" font-size="9" fill="#6C7C71">14 m</text>
+          </svg>
+        </div>
+        <div class="panelbox">
+          <h3>Exportar</h3>
+          <p class="hint" style="margin:0 0 10px">Solo se exportan las copas visibles con los filtros actuales (1 002 de 1 093).</p>
+          <div class="exp">
+            <button class="btn">GeoJSON</button>
+            <button class="btn">Shapefile</button>
+            <button class="btn">GeoPackage</button>
+            <button class="btn">CSV de atributos</button>
+            <button class="btn">Máscara GeoTIFF</button>
+            <button class="btn">Reporte PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+(function(){
+"use strict";
+/* --------- utilidades --------- */
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+var R=rng(20260512), NS="http://www.w3.org/2000/svg";
+var MPP=0.08;               // metros por unidad del viewBox
+var ESP=["Sin clasificar","Cordia alliodora","Cedrela odorata","Terminalia amazonia","Vochysia guatemalensis","Hieronyma alchorneoides"];
+
+/* --------- datos simulados de copas --------- */
+var crowns=[], id=0;
+for(var gy=0; gy<9; gy++){
+  for(var gx=0; gx<13; gx++){
+    if(R()<0.09) continue;
+    var cx=48+gx*94+(R()-0.5)*46, cy=45+gy*90+(R()-0.5)*44;
+    var rad=24+R()*22;
+    var conf=0.42+Math.pow(R(),0.55)*0.57;
+    var pts=[], n=11+Math.floor(R()*4);
+    for(var i=0;i<n;i++){
+      var a=i/n*Math.PI*2, rr=rad*(0.78+R()*0.42);
+      pts.push([+(cx+Math.cos(a)*rr).toFixed(1), +(cy+Math.sin(a)*rr*0.94).toFixed(1)]);
+    }
+    var area=Math.PI*rad*rad*0.86*MPP*MPP;
+    crowns.push({
+      id:"CP-"+String(++id).padStart(4,"0"),
+      cx:cx, cy:cy, r:rad, pts:pts, conf:conf,
+      area:area, diam:2*rad*MPP, alt:6+R()*22,
+      state: conf<0.6 ? (R()<0.35?"no":"low") : "ok",
+      esp: ESP[Math.floor(R()*ESP.length)],
+      hue: 92+R()*40, lum: 22+R()*26
+    });
+  }
+}
+
+/* --------- lienzo del mapa --------- */
+var map=document.getElementById("map");
+function el(t,at){var e=document.createElementNS(NS,t);for(var k in at)e.setAttribute(k,at[k]);return e;}
+
+var defs=el("defs");
+defs.innerHTML='<filter id="soft"><feGaussianBlur stdDeviation="7"/></filter>'+
+               '<filter id="grain"><feTurbulence baseFrequency="0.9" numOctaves="2" result="n"/><feColorMatrix in="n" type="saturate" values="0"/><feComposite operator="in" in2="SourceGraphic"/></filter>';
+map.appendChild(defs);
+
+// fondo: suelo / sotobosque
+map.appendChild(el("rect",{x:0,y:0,width:1200,height:800,fill:"#2A2A18"}));
+var g0=el("g",{filter:"url(#soft)"});
+for(var i=0;i<220;i++){
+  g0.appendChild(el("circle",{cx:R()*1200,cy:R()*800,r:14+R()*40,
+    fill:"hsl("+(60+R()*35)+",28%,"+(12+R()*12)+"%)",opacity:(0.4+R()*0.5).toFixed(2)}));
+}
+map.appendChild(g0);
+
+// capa ortomosaico: masa de dosel
+var gOrto=el("g",{id:"L-orto",filter:"url(#soft)"});
+crowns.forEach(function(c){
+  gOrto.appendChild(el("circle",{cx:c.cx,cy:c.cy,r:c.r*1.12,
+    fill:"hsl("+c.hue+",34%,"+c.lum+"%)",opacity:.95}));
+  for(var k=0;k<5;k++){
+    var a=R()*6.28, d=R()*c.r*0.6;
+    gOrto.appendChild(el("circle",{cx:c.cx+Math.cos(a)*d,cy:c.cy+Math.sin(a)*d,
+      r:c.r*(0.3+R()*0.3),fill:"hsl("+(c.hue+R()*16-8)+",38%,"+(c.lum+R()*14-4)+"%)",opacity:.75}));
+  }
+});
+map.appendChild(gOrto);
+
+// capa CHM (altura)
+var gChm=el("g",{id:"L-chm",filter:"url(#soft)",opacity:0,style:"display:none"});
+gChm.appendChild(el("rect",{x:0,y:0,width:1200,height:800,fill:"#1B1146"}));
+crowns.slice().sort(function(a,b){return a.alt-b.alt}).forEach(function(c){
+  var t=(c.alt-6)/22;
+  var col="hsl("+(268-t*230)+","+(62+t*24)+"%,"+(34+t*34)+"%)";
+  gChm.appendChild(el("circle",{cx:c.cx,cy:c.cy,r:c.r*1.1,fill:col}));
+});
+map.appendChild(gChm);
+
+// parcelas de campo
+var gPar=el("g",{id:"L-parcelas"});
+[[70,60],[430,110],[820,70],[180,470],[560,520],[900,430]].forEach(function(p,ix){
+  gPar.appendChild(el("rect",{x:p[0],y:p[1],width:250,height:250,fill:"rgba(124,108,255,.09)",
+    stroke:"#7C6CFF","stroke-width":1.6,"stroke-dasharray":"7 5",rx:2}));
+  var t=el("text",{x:p[0]+7,y:p[1]+17,fill:"#B7AEFF","font-family":"IBM Plex Mono","font-size":12});
+  t.textContent="P-0"+(ix+1); gPar.appendChild(t);
+});
+map.appendChild(gPar);
+
+// polígonos de copas
+var gCop=el("g",{id:"L-copas"});
+var COL={ok:"#00CFBB",low:"#F0A527",no:"#DB4A3C"};
+crowns.forEach(function(c){
+  var p=el("polygon",{points:c.pts.map(function(q){return q.join(",")}).join(" "),
+    fill:"rgba(0,0,0,0)",stroke:COL[c.state],"stroke-width":1.7,
+    "stroke-dasharray":c.state==="no"?"5 4":"none",class:"poly",tabindex:"0",
+    style:"cursor:pointer"});
+  p.setAttribute("data-id",c.id);
+  c.node=p; gCop.appendChild(p);
+});
+map.appendChild(gCop);
+var gSel=el("g",{id:"L-sel"}); map.appendChild(gSel);
+
+/* --------- interacción --------- */
+var sel=null;
+function fmt(n,d){return n.toFixed(d===undefined?1:d)}
+function visible(c){
+  var conf=+document.getElementById("conf").value/100;
+  var amin=+document.getElementById("amin").value/10;
+  return c.conf>=conf && c.area>=amin;
+}
+function refresh(){
+  var vis=crowns.filter(visible), ok=0,low=0,no=0,sumA=0,sumD=0;
+  crowns.forEach(function(c){
+    var v=visible(c);
+    c.node.style.opacity=v?(document.getElementById("op").value/100):0;
+    c.node.style.pointerEvents=v?"auto":"none";
+  });
+  vis.forEach(function(c){ if(c.state==="ok")ok++; else if(c.state==="low")low++; else no++; sumA+=c.area; sumD+=c.diam; });
+  var ha=12.4;
+  document.getElementById("n-ok").textContent=ok;
+  document.getElementById("n-low").textContent=low;
+  document.getElementById("n-no").textContent=no;
+  document.getElementById("f-n").textContent=vis.length;
+  document.getElementById("f-dens").textContent=Math.round(vis.length/ha*8.9)+" árb/ha";
+  document.getElementById("f-cob").textContent=fmt(Math.min(96,sumA/700*100))+" %";
+  document.getElementById("f-dm").textContent=fmt(vis.length?sumD/vis.length:0)+" m";
+  document.getElementById("f-rev").textContent=Math.round(ok/(vis.length||1)*100)+" % confirmada";
+  document.getElementById("confv").textContent=(+document.getElementById("conf").value/100).toFixed(2);
+  document.getElementById("aminv").textContent=(+document.getElementById("amin").value/10).toFixed(1)+" m²";
+}
+function select(c){
+  sel=c;
+  while(gSel.firstChild) gSel.removeChild(gSel.firstChild);
+  gSel.appendChild(el("polygon",{points:c.pts.map(function(q){return q.join(",")}).join(" "),
+    fill:"rgba(255,255,255,.14)",stroke:"#fff","stroke-width":2.4}));
+  c.pts.forEach(function(q){ gSel.appendChild(el("rect",{x:q[0]-3,y:q[1]-3,width:6,height:6,fill:"#fff",stroke:"#0B1310"})); });
+  var B={ok:["Confirmada","b-ok"],low:["Revisar · confianza baja","b-low"],no:["Descartada","b-no"]}[c.state];
+  document.getElementById("d-id").textContent=c.id;
+  var bd=document.getElementById("d-badge"); bd.textContent=B[0]; bd.className="badge "+B[1];
+  document.getElementById("d-conf").textContent=c.conf.toFixed(2);
+  document.getElementById("d-area").textContent=fmt(c.area)+" m²";
+  document.getElementById("d-diam").textContent=fmt(c.diam)+" m";
+  document.getElementById("d-alt").textContent=fmt(c.alt)+" m";
+  document.getElementById("d-vert").textContent=c.pts.length;
+  document.getElementById("d-cent").textContent=(487320+c.cx*0.08).toFixed(1)+" E · "+(1098640-c.cy*0.08).toFixed(1)+" N";
+  var s=document.getElementById("d-esp"); s.innerHTML=""; 
+  ESP.forEach(function(e){var o=document.createElement("option");o.textContent=e;if(e===c.esp)o.selected=true;s.appendChild(o);});
+  // miniatura
+  var t=document.getElementById("d-thumb");
+  t.innerHTML='<svg viewBox="'+(c.cx-c.r*1.9)+' '+(c.cy-c.r*1.4)+' '+(c.r*3.8)+' '+(c.r*2.8)+'">'+
+    '<rect x="'+(c.cx-c.r*2)+'" y="'+(c.cy-c.r*2)+'" width="'+(c.r*4)+'" height="'+(c.r*4)+'" fill="#25301F"/>'+
+    '<circle cx="'+c.cx+'" cy="'+c.cy+'" r="'+(c.r*1.1)+'" fill="hsl('+c.hue+',34%,'+c.lum+'%)"/>'+
+    '<polygon points="'+c.pts.map(function(q){return q.join(",")}).join(" ")+'" fill="none" stroke="'+COL[c.state]+'" stroke-width="1.6"/></svg>';
+}
+gCop.addEventListener("click",function(e){
+  var t=e.target.getAttribute&&e.target.getAttribute("data-id");
+  if(!t) return;
+  var c=crowns.filter(function(x){return x.id===t})[0]; if(c) select(c);
+});
+gCop.addEventListener("keydown",function(e){
+  if(e.key!=="Enter"&&e.key!==" ") return;
+  var t=e.target.getAttribute&&e.target.getAttribute("data-id"); if(!t) return;
+  e.preventDefault();
+  var c=crowns.filter(function(x){return x.id===t})[0]; if(c) select(c);
+});
+["conf","amin","op"].forEach(function(k){ document.getElementById(k).addEventListener("input",refresh); });
+
+document.querySelectorAll(".layer").forEach(function(l){
+  l.addEventListener("click",function(){
+    var on=l.getAttribute("data-on")==="1"?"0":"1";
+    l.setAttribute("data-on",on);
+    var m={orto:"L-orto",chm:"L-chm",copas:"L-copas",parcelas:"L-parcelas"}[l.getAttribute("data-layer")];
+    var node=document.getElementById(m);
+    node.style.display=on==="1"?"":"none";
+    node.style.opacity=on==="1"?1:0;
+    if(m==="L-sel"||m==="L-copas") gSel.style.display=node.style.display;
+  });
+});
+
+document.querySelector(".canvaswrap").addEventListener("mousemove",function(e){
+  var r=this.getBoundingClientRect();
+  var x=(e.clientX-r.left)/r.width, y=(e.clientY-r.top)/r.height;
+  document.getElementById("coords").textContent=
+    (9.9385+(0.5-y)*0.0009).toFixed(5)+"° N \u00A0 "+(84.0912+(x-0.5)*0.0011).toFixed(5)+"° O \u00A0|\u00A0 1:400";
+});
+
+/* --------- tarjetas de proyectos --------- */
+function miniatura(seed){
+  var r2=rng(seed), s='<svg viewBox="0 0 240 120"><rect width="240" height="120" fill="#2A2A18"/><g filter="url(#soft)">';
+  for(var i=0;i<70;i++){
+    s+='<circle cx="'+(r2()*240).toFixed(0)+'" cy="'+(r2()*120).toFixed(0)+'" r="'+(6+r2()*13).toFixed(0)+'" fill="hsl('+(92+r2()*40).toFixed(0)+',34%,'+(20+r2()*24).toFixed(0)+'%)"/>';
+  }
+  s+='</g><defs><filter id="soft"><feGaussianBlur stdDeviation="3"/></filter></defs></svg>';
+  return s;
+}
+var PROY=[
+  {n:"Lote Norte",f:"12 may 2026",a:"12.4 ha",t:"1 093 copas",s:"Revisado 78 %",c:"var(--signal)"},
+  {n:"Quebrada Honda",f:"28 abr 2026",a:"8.1 ha",t:"642 copas",s:"Listo",c:"var(--signal)"},
+  {n:"Plantación El Alto",f:"19 abr 2026",a:"21.7 ha",t:"2 410 copas",s:"Procesando 64 %",c:"var(--warn)"},
+  {n:"Ribera Río Sucio",f:"02 abr 2026",a:"5.3 ha",t:"—",s:"Error de georreferencia",c:"var(--danger)"}
+];
+var pg=document.getElementById("projgrid");
+PROY.forEach(function(p,ix){
+  var d=document.createElement("article"); d.className="card";
+  d.innerHTML='<div class="pic">'+miniatura(1000+ix*77)+'</div><div class="body">'+
+    '<h4>'+p.n+'</h4><div class="m">'+p.f+' · '+p.a+' · '+p.t+'</div>'+
+    '<div class="st"><span class="lbl" style="color:'+p.c+'">'+p.s+'</span><button class="btn" data-go="visor">Abrir</button></div></div>';
+  pg.appendChild(d);
+});
+var nu=document.createElement("button"); nu.className="card new"; nu.setAttribute("data-go","procesar");
+nu.innerHTML='<span><span style="font-size:22px;display:block;text-align:center">＋</span>Cargar nuevo vuelo</span>';
+pg.appendChild(nu);
+
+/* --------- histograma --------- */
+var bins=[0,0,0,0,0,0,0,0];
+crowns.forEach(function(c){var b=Math.min(7,Math.max(0,Math.floor((c.diam-2)/1.5)));bins[b]++;});
+var mx=Math.max.apply(null,bins), h=document.getElementById("hist");
+bins.forEach(function(v,i){
+  var bh=v/mx*96, x=34+i*34.5;
+  h.appendChild(el("rect",{x:x,y:122-bh,width:27,height:bh,fill:"#1B2620",rx:1}));
+  var t=el("text",{x:x+13.5,y:118-bh,"text-anchor":"middle","font-family":"IBM Plex Mono","font-size":9,fill:"#6C7C71"});
+  t.textContent=v; h.appendChild(t);
+});
+
+/* --------- navegación entre pantallas --------- */
+function go(name){
+  document.querySelectorAll(".screen").forEach(function(s){s.classList.toggle("on",s.id==="s-"+name)});
+  document.querySelectorAll(".mockbar nav button").forEach(function(b){
+    b.setAttribute("aria-current", b.getAttribute("data-go")===name ? "true":"false");
+  });
+  window.scrollTo(0,0);
+}
+document.addEventListener("click",function(e){
+  var t=e.target.closest("[data-go]"); if(t) go(t.getAttribute("data-go"));
+});
+
+refresh();
+select(crowns[Math.floor(crowns.length*0.42)]);
+})();
+</script>
+</body>
+</html>

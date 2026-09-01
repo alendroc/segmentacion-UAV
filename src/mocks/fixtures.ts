@@ -92,5 +92,22 @@ export const ORTOMOSAICO: Ortomosaico = {
       "El archivo servido es una simulacion generada con la misma semilla que las copas.",
     ],
   },
+  /*
+   * Metadatos leidos del EXIF y el XMP de DJI_20260415111419_0054.JPG, el
+   * fotograma real del vuelo. Ver datos-fuente/LEEME.md.
+   * GSD = 52.597 x 35.9 / (35 x 8192) = 0.659 cm/pixel.
+   * Huella = 8192 x 0.00659 = 53.9 m por 5460 x 0.00659 = 36.0 m.
+   */
+  vuelo: {
+    camara: "DJI Zenmuse P1",
+    distanciaFocalMm: 35,
+    alturaVueloM: 52.597,
+    latitud: 10.268296,
+    longitud: -85.736666,
+    gsdCmPorPixel: 0.659,
+    huellaM: [53.9, 36.0],
+    urlFotograma: "/simulacion/vuelo-lote-norte.jpg",
+    urlMiniatura: "/simulacion/vuelo-lote-norte-mini.jpg",
+  },
   subidoEn: "2026-04-15T17:14:19.000Z",
 };
