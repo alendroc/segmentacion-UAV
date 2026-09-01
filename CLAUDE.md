@@ -90,18 +90,23 @@ src/
   mocks/
     browser.ts        setupWorker
     server.ts         setupServer, para las pruebas
-    handlers.ts       Handlers MSW
+    handlers.ts       Handlers MSW. Tiene estado: ver la nota de abajo
     fixtures.ts       Carga los fixtures y los adapta al modelo de dominio
     generador.ts      Generación sintética con semilla fija
     fondoSimulado.ts  Ortomosaico sustituto en SVG. Ver §9
     fixtures/         GeoJSON producido por el generador
   features/
     proyectos/        RF-01
+      DialogoNuevoProyecto.tsx
+      useCrearProyecto.ts
     carga/            RF-02 a RF-05
     procesamiento/    RF-06 a RF-12
     visor/            RF-13 a RF-22
       estilosCopa.ts  Estado de una copa y su apariencia. Sin React
+      metricas.ts     Filtros y métricas agregadas. Funciones puras
       PanelDetalle.tsx
+      PanelFiltros.tsx
+      PanelMetricas.tsx
       MiniaturaCopa.tsx  Recorte del ortomosaico alrededor de una copa
     exportacion/      RF-23 a RF-25
   components/
@@ -134,6 +139,13 @@ src/
 
 `src/components/ui/` es exactamente el destino por defecto de shadcn: no hay que mover nada. Ese
 directorio es código vendorizado; se regenera con el CLI y no se edita a mano.
+
+**El mock tiene estado.** Crear o eliminar proyectos modifica el arreglo que sirve
+`handlers.ts`. Ese estado vive en memoria: sobrevive a la navegación dentro de la sesión, pero no
+a recargar la página, y simular persistencia de disco sería mentir sobre lo que hay. Entre pruebas
+se reinicia con `reiniciarDatosSimulados()`, que llama `src/test/setup.ts`. **Todo handler nuevo
+que mute datos tiene que quedar cubierto por esa función**, o el estado se filtra de una prueba a
+la siguiente.
 
 `src/test/setup.ts` es el único punto donde se registra MSW en las pruebas. Gracias a eso, ni
 siquiera los archivos de prueba de `features/` necesitan importar `mocks/` y la regla de oro se
@@ -202,7 +214,12 @@ que ese valor las distingue sin ambigüedad. Vive en `features/visor/estilosCopa
 duplica.
 
 **Filtros.** Los filtros de confianza y área **ocultan**, no borran. El conteo visible se
-recalcula; el dato persiste.
+recalcula; el dato persiste. El filtrado y el recálculo ocurren en el cliente sobre los datos ya
+descargados: mover un deslizador nunca vuelve a pedir nada al servidor.
+
+Una copa **sin confianza** —trazada o corregida a mano— nunca se oculta por el filtro de
+confianza. El umbral mide al modelo, y sobre esas copas el modelo no opinó: descartarlas por no
+tener nota castigaría precisamente el trabajo de corrección que la interfaz existe para permitir.
 
 **Eliminación.** Eliminar una detección es borrado lógico, no físico. El registro conserva la
 copa marcada para que la exportación pueda reportar cuántas se descartaron.

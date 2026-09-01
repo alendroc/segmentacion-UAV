@@ -8,6 +8,7 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
 import { afterAll, afterEach, beforeAll, vi } from "vitest";
+import { reiniciarDatosSimulados } from "@/mocks/handlers";
 import { server } from "@/mocks/server";
 
 // jsdom no implementa matchMedia y el store de tema lo consulta al arrancar.
@@ -29,5 +30,8 @@ beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
 afterEach(() => {
   cleanup();
   server.resetHandlers();
+  // El mock tiene estado: crear o eliminar proyectos lo modifica y se filtraria
+  // de una prueba a la siguiente.
+  reiniciarDatosSimulados();
 });
 afterAll(() => server.close());

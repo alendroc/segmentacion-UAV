@@ -8,10 +8,14 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { APARIENCIAS, estadoDeCopa } from "@/features/visor/estilosCopa";
+import { calcularMetricas, filtrarCopas } from "@/features/visor/metricas";
 import { PanelDetalle } from "@/features/visor/PanelDetalle";
+import { PanelFiltros } from "@/features/visor/PanelFiltros";
+import { PanelMetricas } from "@/features/visor/PanelMetricas";
+import { useAreaInteres } from "@/features/visor/useAreaInteres";
 import { useCopas } from "@/features/visor/useCopas";
 import { useOrtomosaico } from "@/features/visor/useOrtomosaico";
-import { formatearArea, formatearEntero } from "@/lib/formato";
+import { useUiStore } from "@/store/uiStore";
 
 function Simbologia({ presentes }: { presentes: Set<string> }) {
   return (
@@ -35,35 +39,32 @@ function Simbologia({ presentes }: { presentes: Set<string> }) {
   );
 }
 
-function Metrica({ etiqueta, valor }: { etiqueta: string; valor: string }) {
-  return (
-    <div className="flex flex-col">
-      <span className="text-xs text-muted-foreground">{etiqueta}</span>
-      <span className="text-sm font-medium tabular-nums">{valor}</span>
-    </div>
-  );
-}
-
 export function VisorPage() {
   const { proyectoId = "" } = useParams<{ proyectoId: string }>();
   const [seleccionadaId, setSeleccionadaId] = useState<string | null>(null);
+  const filtros = useUiStore((e) => e.filtros);
 
   const ortomosaico = useOrtomosaico(proyectoId);
   const copasQuery = useCopas(proyectoId);
+  const areaQuery = useAreaInteres(proyectoId);
+
   const copas = useMemo(() => copasQuery.data ?? [], [copasQuery.data]);
+  const areaHa = areaQuery.data?.areaHa ?? 0;
 
-  const visibles = useMemo(() => copas.filter((c) => !c.eliminada), [copas]);
-  const seleccionada = copas.find((c) => c.id === seleccionadaId) ?? null;
-
-  const estados = useMemo(
-    () => new Set(copas.map((copa) => estadoDeCopa(copa))),
-    [copas],
+  // Filtrar y medir ocurre aqui, sobre los datos ya descargados: mover un
+  // deslizador no vuelve a pedir nada al servidor (RF-16).
+  const visibles = useMemo(() => filtrarCopas(copas, filtros), [copas, filtros]);
+  const metricas = useMemo(
+    () => calcularMetricas(copas, filtros, areaHa),
+    [copas, filtros, areaHa],
   );
 
-  const areaTotal = visibles.reduce((suma, c) => suma + c.areaM2, 0);
-  const diametroMedio = visibles.length
-    ? visibles.reduce((s, c) => s + c.diametroM, 0) / visibles.length
-    : 0;
+  const seleccionada = visibles.find((c) => c.id === seleccionadaId) ?? null;
+
+  const estados = useMemo(
+    () => new Set(visibles.map((copa) => estadoDeCopa(copa))),
+    [visibles],
+  );
 
   const cargando = ortomosaico.isPending || copasQuery.isPending;
   const fallo = ortomosaico.error ?? copasQuery.error;
@@ -94,6 +95,8 @@ export function VisorPage() {
 
       {ortomosaico.data ? (
         <>
+          <PanelMetricas metricas={metricas} areaHa={areaHa} />
+
           <div className="grid gap-4 lg:grid-cols-[1fr_20rem]">
             <div className="space-y-3">
               <MapaBase
@@ -107,36 +110,23 @@ export function VisorPage() {
                 className="h-[560px] w-full"
               >
                 <CapaCopas
-                  copas={copas}
+                  copas={visibles}
                   seleccionadaId={seleccionadaId}
                   onSeleccionar={setSeleccionadaId}
                 />
               </MapaBase>
 
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <Simbologia presentes={estados} />
-                <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-                  <Metrica
-                    etiqueta="Copas visibles"
-                    valor={formatearEntero(visibles.length)}
-                  />
-                  <Metrica
-                    etiqueta="Area de copa total"
-                    valor={formatearArea(areaTotal)}
-                  />
-                  <Metrica
-                    etiqueta="Diametro medio"
-                    valor={`${diametroMedio.toFixed(2).replace(".", ",")} m`}
-                  />
-                </div>
-              </div>
+              <Simbologia presentes={estados} />
             </div>
 
-            <PanelDetalle
-              copa={seleccionada}
-              urlImagen={ortomosaico.data.urlCog}
-              extension={ortomosaico.data.extension}
-            />
+            <div className="space-y-4">
+              <PanelFiltros metricas={metricas} />
+              <PanelDetalle
+                copa={seleccionada}
+                urlImagen={ortomosaico.data.urlCog}
+                extension={ortomosaico.data.extension}
+              />
+            </div>
           </div>
 
           {ortomosaico.data.validacion.mensajes.length > 0 ? (

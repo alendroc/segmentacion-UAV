@@ -2,10 +2,11 @@
  * Estado de interfaz. No guarda datos del servidor: de eso se encarga
  * TanStack Query.
  *
- * En la Fase 1 solo vive el tema. La herramienta activa, los filtros y el
- * historial de deshacer llegan en las Fases 5 y 6.
+ * Aqui viven el tema y los filtros del visor. La herramienta activa y el
+ * historial de deshacer llegan en la Fase 6.
  */
 import { create } from "zustand";
+import { FILTROS_INICIALES, type Filtros } from "@/features/visor/metricas";
 
 export type Tema = "claro" | "oscuro";
 
@@ -26,6 +27,11 @@ function aplicarTema(tema: Tema): void {
 interface EstadoUi {
   tema: Tema;
   alternarTema: () => void;
+
+  /** Filtros del visor. Ocultan copas; nunca las modifican. */
+  filtros: Filtros;
+  fijarFiltro: <C extends keyof Filtros>(clave: C, valor: Filtros[C]) => void;
+  restaurarFiltros: () => void;
 }
 
 export const useUiStore = create<EstadoUi>((set, get) => ({
@@ -36,6 +42,11 @@ export const useUiStore = create<EstadoUi>((set, get) => ({
     aplicarTema(siguiente);
     set({ tema: siguiente });
   },
+
+  filtros: FILTROS_INICIALES,
+  fijarFiltro: (clave, valor) =>
+    set((estado) => ({ filtros: { ...estado.filtros, [clave]: valor } })),
+  restaurarFiltros: () => set({ filtros: FILTROS_INICIALES }),
 }));
 
 /** Se llama una vez al arrancar, antes de montar React. */

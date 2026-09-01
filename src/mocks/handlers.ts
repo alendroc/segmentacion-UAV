@@ -10,6 +10,7 @@ import type { CapacidadesExportacion } from "@/api/endpoints";
 import type {
   AreaInteres,
   Copa,
+  NuevoProyecto,
   Ortomosaico,
   Proyecto,
   RespuestaError,
@@ -25,64 +26,77 @@ import {
 const BASE = "/api";
 
 /**
- * Datos de la Fase 1. Los tres estados que exige la Fase 8 estan representados:
- * lista con datos, un proyecto en proceso y uno con error de georreferencia.
- * La lista vacia se reproduce con el parametro de solo-simulacion "_escenario".
+ * Los tres estados que exige la Fase 8 estan representados: lista con datos, un
+ * proyecto en proceso y uno con error de georreferencia. La lista vacia se
+ * reproduce con el parametro de solo-simulacion "_escenario".
+ *
+ * Es una funcion, no una constante, porque el mock tiene estado: crear o
+ * eliminar proyectos lo modifica. `reiniciarDatosSimulados()` lo devuelve al
+ * punto de partida entre pruebas.
  */
-const PROYECTOS: Proyecto[] = [
-  {
-    id: PROYECTO_CON_DATOS,
-    nombre: "Lote Norte",
-    descripcion:
-      "Parcela permanente de monitoreo en bosque tropical seco secundario.",
-    sitio: "Nicoya, Guanacaste",
-    creadoEn: "2026-03-11T15:20:00.000Z",
-    actualizadoEn: "2026-04-02T18:05:00.000Z",
-    estado: "completado",
-    ortomosaicoId: "om-001",
-    // Se deriva del fixture: si el generador cambia, el conteo lo acompana.
-    totalCopas: COPAS.length,
-    urlMiniatura: "/simulacion/vuelo-lote-norte-mini.jpg",
-  },
-  {
-    id: "pr-002",
-    nombre: "Quebrada Seca",
-    descripcion:
-      "Transecto ribereno con dosel discontinuo y arbolado caducifolio.",
-    sitio: "Santa Cruz, Guanacaste",
-    creadoEn: "2026-04-18T14:00:00.000Z",
-    actualizadoEn: "2026-04-18T14:42:00.000Z",
-    estado: "procesando",
-    ortomosaicoId: "om-002",
-    totalCopas: null,
-    urlMiniatura: null,
-  },
-  {
-    id: "pr-003",
-    nombre: "Hacienda La Pacifica",
-    descripcion:
-      "Vuelo de reconocimiento. El archivo no declara sistema de referencia.",
-    sitio: "Canas, Guanacaste",
-    creadoEn: "2026-04-25T09:30:00.000Z",
-    actualizadoEn: "2026-04-25T09:34:00.000Z",
-    estado: "error_georreferencia",
-    ortomosaicoId: "om-003",
-    totalCopas: null,
-    urlMiniatura: null,
-  },
-  {
-    id: "pr-004",
-    nombre: "Barra Honda sector sur",
-    descripcion: "Proyecto creado, a la espera de la carga del ortomosaico.",
-    sitio: "Barra Honda, Guanacaste",
-    creadoEn: "2026-05-02T21:10:00.000Z",
-    actualizadoEn: "2026-05-02T21:10:00.000Z",
-    estado: "sin_ortomosaico",
-    ortomosaicoId: null,
-    totalCopas: null,
-    urlMiniatura: null,
-  },
-];
+function proyectosIniciales(): Proyecto[] {
+  return [
+    {
+      id: PROYECTO_CON_DATOS,
+      nombre: "Lote Norte",
+      descripcion:
+        "Parcela permanente de monitoreo en bosque tropical seco secundario.",
+      sitio: "Nicoya, Guanacaste",
+      creadoEn: "2026-03-11T15:20:00.000Z",
+      actualizadoEn: "2026-04-02T18:05:00.000Z",
+      estado: "completado",
+      ortomosaicoId: "om-001",
+      // Se deriva del fixture: si el generador cambia, el conteo lo acompana.
+      totalCopas: COPAS.length,
+      urlMiniatura: "/simulacion/vuelo-lote-norte-mini.jpg",
+    },
+    {
+      id: "pr-002",
+      nombre: "Quebrada Seca",
+      descripcion:
+        "Transecto ribereno con dosel discontinuo y arbolado caducifolio.",
+      sitio: "Santa Cruz, Guanacaste",
+      creadoEn: "2026-04-18T14:00:00.000Z",
+      actualizadoEn: "2026-04-18T14:42:00.000Z",
+      estado: "procesando",
+      ortomosaicoId: "om-002",
+      totalCopas: null,
+      urlMiniatura: null,
+    },
+    {
+      id: "pr-003",
+      nombre: "Hacienda La Pacifica",
+      descripcion:
+        "Vuelo de reconocimiento. El archivo no declara sistema de referencia.",
+      sitio: "Canas, Guanacaste",
+      creadoEn: "2026-04-25T09:30:00.000Z",
+      actualizadoEn: "2026-04-25T09:34:00.000Z",
+      estado: "error_georreferencia",
+      ortomosaicoId: "om-003",
+      totalCopas: null,
+      urlMiniatura: null,
+    },
+    {
+      id: "pr-004",
+      nombre: "Barra Honda sector sur",
+      descripcion: "Proyecto creado, a la espera de la carga del ortomosaico.",
+      sitio: "Barra Honda, Guanacaste",
+      creadoEn: "2026-05-02T21:10:00.000Z",
+      actualizadoEn: "2026-05-02T21:10:00.000Z",
+      estado: "sin_ortomosaico",
+      ortomosaicoId: null,
+      totalCopas: null,
+      urlMiniatura: null,
+    },
+  ];
+}
+
+const PROYECTOS: Proyecto[] = proyectosIniciales();
+
+/** Devuelve el mock a su estado de partida. Lo llama `src/test/setup.ts`. */
+export function reiniciarDatosSimulados(): void {
+  PROYECTOS.splice(0, PROYECTOS.length, ...proyectosIniciales());
+}
 
 function noEncontrado(mensaje: string) {
   const cuerpo: RespuestaError = { mensaje, detalle: null };
@@ -104,6 +118,48 @@ export const handlers = [
       return HttpResponse.json(cuerpo, { status: 500 });
     }
     return HttpResponse.json(PROYECTOS);
+  }),
+
+  /*
+   * Creacion de proyecto — RF-01.
+   * El mock guarda en memoria: los proyectos nuevos sobreviven a la navegacion
+   * dentro de la sesion, pero no a recargar la pagina. Un back end real
+   * persistiria; simular persistencia de disco seria mentir sobre lo que hay.
+   */
+  http.post(`${BASE}/proyectos`, async ({ request }) => {
+    const datos = (await request.json()) as NuevoProyecto;
+
+    const nombre = datos.nombre?.trim();
+    if (!nombre) {
+      const cuerpo: RespuestaError = {
+        mensaje: "El nombre del proyecto es obligatorio.",
+        detalle: null,
+      };
+      return HttpResponse.json(cuerpo, { status: 422 });
+    }
+
+    const ahora = new Date().toISOString();
+    const proyecto: Proyecto = {
+      id: `pr-${Date.now().toString(36)}`,
+      nombre,
+      descripcion: datos.descripcion?.trim() ?? "",
+      sitio: datos.sitio?.trim() ?? "",
+      creadoEn: ahora,
+      actualizadoEn: ahora,
+      estado: "sin_ortomosaico",
+      ortomosaicoId: null,
+      totalCopas: null,
+      urlMiniatura: null,
+    };
+    PROYECTOS.unshift(proyecto);
+    return HttpResponse.json(proyecto, { status: 201 });
+  }),
+
+  http.delete(`${BASE}/proyectos/:proyectoId`, ({ params }) => {
+    const i = PROYECTOS.findIndex((p) => p.id === params.proyectoId);
+    if (i < 0) return noEncontrado("El proyecto solicitado no existe.");
+    PROYECTOS.splice(i, 1);
+    return new HttpResponse(null, { status: 204 });
   }),
 
   http.get(`${BASE}/proyectos/:proyectoId`, ({ params }) => {

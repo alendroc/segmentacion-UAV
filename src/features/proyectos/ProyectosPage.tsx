@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DialogoNuevoProyecto } from "@/features/proyectos/DialogoNuevoProyecto";
 import { describirEstado } from "@/features/proyectos/estadoProyecto";
 import { useProyectos } from "@/features/proyectos/useProyectos";
 import { formatearEntero, formatearFecha } from "@/lib/formato";
@@ -117,6 +118,9 @@ function SinProyectos() {
         <CardDescription>
           Un proyecto agrupa un ortomosaico y las copas detectadas sobre el.
         </CardDescription>
+        <div className="mt-2">
+          <DialogoNuevoProyecto />
+        </div>
       </CardContent>
     </Card>
   );
@@ -127,14 +131,18 @@ export function ProyectosPage() {
 
   return (
     <section className="space-y-5">
-      <header className="space-y-1">
-        <h1 className="font-heading text-xl font-semibold tracking-tight">
-          Proyectos
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Levantamientos con vehiculo aereo no tripulado en el bosque tropical
-          seco de la Region Chorotega. Abra uno para recorrer el flujo completo.
-        </p>
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div className="space-y-1">
+          <h1 className="font-heading text-xl font-semibold tracking-tight">
+            Proyectos
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Levantamientos con vehiculo aereo no tripulado en el bosque tropical
+            seco de la Region Chorotega. Abra uno para recorrer el flujo
+            completo.
+          </p>
+        </div>
+        <DialogoNuevoProyecto />
       </header>
 
       {isPending ? <Cargando /> : null}

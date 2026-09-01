@@ -182,7 +182,7 @@ necesitaba; el resto de la Fase 8 sigue pendiente.
 
 ---
 
-## Fase 5 — Filtros y métricas agregadas ← **siguiente**
+## Fase 5 — Filtros y métricas agregadas — **COMPLETADA**
 
 **Cubre.** RF-16, RF-18.
 
@@ -196,9 +196,26 @@ necesitaba; el resto de la Fase 8 sigue pendiente.
 2. La densidad equivale al conteo visible dividido entre la superficie del área de interés.
 3. Restaurar los filtros al valor inicial devuelve exactamente el conteo original.
 
+**Resultado (1 de setiembre de 2026). Los tres criterios se cumplen.**
+
+1. **Cumple.** Comprobado en el navegador: con la confianza mínima al 75 %, el conteo pasa de 131
+   a 106, la densidad de 109.2 a 88.3 por hectárea y la cobertura de 29.3 % a 23.8 %. El filtrado
+   y el recálculo son funciones puras sobre los datos ya descargados, en
+   `features/visor/metricas.ts`; no hay ninguna petición de por medio.
+2. **Cumple.** Prueba unitaria directa contra el cociente.
+3. **Cumple.** Prueba unitaria: filtrar reduce el conteo y restaurar lo devuelve al valor exacto
+   de partida. Otra prueba comprueba que filtrar no modifica las copas.
+
+**Decisión de dominio anotada en CLAUDE.md §5.** Una copa sin confianza —trazada o corregida a
+mano— no se oculta nunca por el filtro de confianza.
+
+**Fuera de la fase, hecho a pedido: creación de proyectos (RF-01).** Diálogo con formulario, POST
+interceptado por MSW y refresco de la lista, con aviso que enlaza al siguiente paso del flujo. El
+mock pasó a tener estado, y con él una función de reinicio para que no se filtre entre pruebas.
+
 ---
 
-## Fase 6 — Corrección manual, parte uno
+## Fase 6 — Corrección manual, parte uno ← **siguiente**
 
 **Cubre.** RF-19, RF-20, RF-22.
 
