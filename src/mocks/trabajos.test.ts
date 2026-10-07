@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { PARAMETROS_POR_DEFECTO } from "@/api/types";
+import { PARAMETROS_POR_DEFECTO } from "@/shared/api/types";
 import {
   cancelarTrabajo,
   contarMosaicos,

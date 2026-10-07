@@ -14,7 +14,7 @@
  * abierto, discontinuo, y con parte del arbolado caducifolio, que en la epoca
  * seca se ve ocre y no verde.
  */
-import { centroideAnillo, type Posicion } from "../lib/geometriaPlana.ts";
+import { centroideAnillo, type Posicion } from "../shared/lib/geometriaPlana.ts";
 import { crearAzar, type ResultadoGenerador } from "./generador.ts";
 
 /** Resolucion del ortomosaico simulado. Un vuelo de VANT tipico ronda esto. */

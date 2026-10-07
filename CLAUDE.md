@@ -32,8 +32,11 @@ existe.
 
 Consecuencia práctica, y es una regla dura:
 
-> Ningún archivo dentro de `src/features/`, `src/components/` o `src/store/` puede importar
-> nada de `src/mocks/`.
+> Solo `src/app/` y `src/test/` pueden importar de `src/mocks/`. Ninguna capa de
+> `shared`, `entities`, `features`, `widgets` o `pages` lo hace.
+
+Esto lo hace cumplir `no-restricted-imports` en `.oxlintrc.json`, así que `npm run lint` falla
+si alguien lo viola.
 
 Si necesitás datos en un componente, pedilos por el cliente de API. Si te ves tentado a importar
 un fixture directamente, la solución correcta es agregar un handler a MSW.
@@ -55,7 +58,7 @@ Cuando el back end real exista, se apaga MSW con una variable de entorno y no ca
 | Geometría | Turf.js | área, centroide, unión |
 | Pruebas | Vitest + Testing Library | Playwright solo en la fase final |
 | Estilos | Tailwind CSS v4 | configuración CSS-first con `@theme`, sin `tailwind.config.js` |
-| Componentes | shadcn/ui | **no es una dependencia**: el CLI copia el código a `src/components/ui/` |
+| Componentes | shadcn/ui | **no es una dependencia**: el CLI copia el código a `src/shared/ui/` |
 | Primitivas | Radix UI | accesibilidad y teclado; se instalan por componente |
 | Animación | Motion | acotada; ver §6 bis |
 | Iconos | lucide-react | |
@@ -67,7 +70,7 @@ el informe del TFG; el apéndice A de este archivo lleva ese registro. En partic
 Leaflet, Mapbox, MapLibre, Redux ni ORMs.
 
 Sobre shadcn/ui: **no es una librería de componentes instalada**. El CLI copia el código fuente a
-`src/components/ui/` y a partir de ahí es código propio del repositorio, versionado y
+`src/shared/ui/` y a partir de ahí es código propio del repositorio, versionado y
 modificable. Lo que sí son dependencias reales son Tailwind, Radix, `cva`, `clsx`,
 `tailwind-merge`, `lucide-react` y `motion`.
 
@@ -81,79 +84,87 @@ Excepción prevista: si Turf no resuelve la división de polígono por línea, s
 
 ## 4. Estructura de carpetas
 
+La estructura sigue **Feature-Sliced Design (FSD)**. Hay seis capas y cada una solo puede importar
+de las que están **debajo** de ella:
+
+```
+app → pages → widgets → features → entities → shared
+```
+
+Dentro de una misma capa, un slice no importa de otro slice. Los imports entre slices pasan por
+su `index.ts` (API pública); dentro del slice se usan rutas relativas.
+
 ```
 src/
-  api/
-    types.ts          Modelos de dominio. Fuente única de verdad.
-    client.ts         fetch tipado. Única puerta al back end.
-    endpoints.ts      Funciones por endpoint. Nada de fetch suelto fuera de aquí.
-  mocks/
-    browser.ts        setupWorker
-    server.ts         setupServer, para las pruebas
-    handlers.ts       Handlers MSW. Tiene estado: ver la nota de abajo
-    trabajos.ts       Motor del trabajo de inferencia simulado
-    fixtures.ts       Carga los fixtures y los adapta al modelo de dominio
-    generador.ts      Generación sintética con semilla fija
-    fondoSimulado.ts  Ortomosaico sustituto en SVG. Ver §9
-    fixtures/         GeoJSON producido por el generador
-  features/
+  app/                Arranque: main.tsx, App.tsx (rutas), proveedores, estilos
+    styles/index.css  Tokens del tema y anulaciones de ol/ol.css. Único CSS del proyecto
+    vite-env.d.ts     Tipado de import.meta.env
+  pages/              Una pantalla por carpeta, con URL propia. Solo componen widgets
     proyectos/        RF-01
-      DialogoNuevoProyecto.tsx
-      useCrearProyecto.ts
     carga/            RF-02 a RF-05
     procesamiento/    RF-06 a RF-12
-      useTrabajos.ts  Sondeo del avance
-      Bitacora.tsx
     visor/            RF-13 a RF-22
-      estilosCopa.ts  Estado de una copa y su apariencia. Sin React
-      metricas.ts     Filtros y métricas agregadas. Funciones puras
-      PanelDetalle.tsx
-      PanelFiltros.tsx
-      PanelMetricas.tsx
-      MiniaturaCopa.tsx  Recorte del ortomosaico alrededor de una copa
     exportacion/      RF-23 a RF-25
-      formatos.ts     Genera GeoJSON y CSV. Funciones puras
-      descargar.ts    Toca el DOM. Aparte de formatos.ts a proposito
-  components/
-    layout/
-      Shell.tsx       Cabecera, migas de pan y pasos del flujo
-      MigasDePan.tsx  Camino de vuelta al inicio desde cualquier punto
-      AccionesDePaso.tsx  Anterior / siguiente / salir al inicio
-    mapa/
-      contextoMapa.ts Instancia de OL compartida con las capas hijas
-      MapaBase.tsx    Instancia de OL, proyección, capa de fondo
-      CapaCopas.tsx   Capa vectorial y estilos por estado
-      useDibujo.ts    Draw / Modify / Snap
-      useDivision.ts  Corte de polígono por línea
-    ui/               Botones, paneles, campos. Sin lógica de dominio.
-  store/
-    uiStore.ts
-  hooks/
-    useMovimientoReducido.ts  Preferencia de movimiento. Único lector. Ver §6 bis
-  lib/
-    utils.ts          Helper `cn()` que crea shadcn. No lo borrés: lo usan todos los componentes
-    geometriaPlana.ts Área, diámetro, centroide. SIN IMPORTS. Ver la nota de abajo
-    geo.ts            Registro de EPSG:5367, transformaciones de CRS. Reexporta geometriaPlana
-    colores.ts        Puente entre los tokens del tema y el lienzo del mapa
-    pasos.ts          El flujo de trabajo, declarado una sola vez
-    formato.ts        Formateo de números y coordenadas
+  widgets/            Bloques de interfaz con varias piezas
+    layout/           Shell, MigasDePan, AccionesDePaso, AvisoSimulacion, AlternarTema
+    mapa/             contextoMapa, MapaBase (OL, proyección, fondo), CapaCopas
+    panel-detalle/    PanelDetalle, MiniaturaCopa
+    panel-filtros/    PanelFiltros
+    panel-metricas/   PanelMetricas
+    bitacora/         Bitacora del trabajo de inferencia
+  features/           Acciones de la persona usuaria
+    crear-proyecto/   DialogoNuevoProyecto, useCrearProyecto
+    exportar-copas/   formatos.ts (puro) y descargar.ts (toca el DOM, aparte a propósito)
+    dibujar-copa/     useDibujo: Draw / Modify / Snap (Fase 6, aún no existe)
+    dividir-copa/     useDivision: corte de polígono por línea (Fase 7, aún no existe)
+  entities/           Conceptos del dominio
+    copa/             estilosCopa, metricas, useCopas, filtrosStore
+    proyecto/         estadoProyecto, useProyecto, useProyectos
+    ortomosaico/      useOrtomosaico, useAreaInteres
+    trabajo/          useTrabajos: sondeo del avance
+  shared/             Sin lógica de pantalla
+    api/              types.ts (fuente única de verdad), client.ts, endpoints.ts, claves.ts
+    ui/               Componentes de shadcn
+    lib/              utils (`cn()`), geometriaPlana (SIN IMPORTS), geo, colores, pasos, formato
+    hooks/            useMovimientoReducido (único lector de prefers-reduced-motion)
+    store/            temaStore
+  mocks/              Fuera de las capas: solo lo importan app/ y test/
+    browser.ts        setupWorker
+    server.ts         setupServer, para las pruebas
+    handlers/         Un archivo por recurso; index.ts los reúne
+    trabajos.ts       Motor del trabajo de inferencia simulado
+    bitacoraTrabajo.ts  Etapas y bitácora de ese trabajo
+    fixtures.ts       Carga los fixtures y los adapta al modelo de dominio
+    generador.ts      Generación sintética con semilla fija
+    azar.ts           PRNG y utilidades numéricas del generador
+    fondoSimulado.ts  Ortomosaico sustituto en SVG. Ver §9
+    fixtures/         GeoJSON producido por el generador
   test/
     setup.ts          Arranque de Vitest. Registra MSW para TODAS las pruebas
     utils.tsx         `renderConProveedores()`
 ```
 
-`src/components/ui/` es exactamente el destino por defecto de shadcn: no hay que mover nada. Ese
-directorio es código vendorizado; se regenera con el CLI y no se edita a mano.
+Dónde va cada cosa cuando dudás: si es una pantalla, `pages`; si junta varias piezas y se
+reutiliza, `widgets`; si es un verbo de la persona usuaria (crear, exportar, dibujar), `features`;
+si es un sustantivo del dominio (copa, proyecto), `entities`; si no sabe nada del dominio,
+`shared`.
+
+`src/shared/ui/` es el destino de shadcn (`components.json` apunta ahí). Ese directorio es código
+vendorizado; se regenera con el CLI y no se edita a mano.
+
+**Variables de entorno.** Hay un solo `.env`, con `VITE_USE_MOCKS` y `VITE_API_URL`, y un
+`.env.example` que lo documenta. Las pruebas corren en Node y necesitan una URL absoluta y MSW
+apagado en el navegador; esos dos valores los fija `test.env` en `vitest.config.ts`.
 
 **El mock tiene estado.** Crear o eliminar proyectos modifica el arreglo que sirve
-`handlers.ts`. Ese estado vive en memoria: sobrevive a la navegación dentro de la sesión, pero no
+`mocks/handlers/estado.ts`. Ese estado vive en memoria: sobrevive a la navegación dentro de la sesión, pero no
 a recargar la página, y simular persistencia de disco sería mentir sobre lo que hay. Entre pruebas
 se reinicia con `reiniciarDatosSimulados()`, que llama `src/test/setup.ts`. **Todo handler nuevo
 que mute datos tiene que quedar cubierto por esa función**, o el estado se filtra de una prueba a
 la siguiente.
 
 `src/test/setup.ts` es el único punto donde se registra MSW en las pruebas. Gracias a eso, ni
-siquiera los archivos de prueba de `features/` necesitan importar `mocks/` y la regla de oro se
+siquiera los archivos de prueba de `pages/` o `features/` necesitan importar `mocks/` y la regla de oro se
 verifica con un solo `grep`.
 
 `scripts/generar-fixtures.ts` vive fuera de `src/` y se ejecuta con `npm run fixtures`.
@@ -168,8 +179,6 @@ plano y no puede cargar proj4 ni OpenLayers. La matemática pura, que no necesit
 dos, vive en un archivo sin un solo `import`; `geo.ts` la reexporta para que el resto de la
 aplicación siga teniendo una sola puerta.
 
-Una carpeta por `feature`, y cada `feature` es dueña de sus pantallas y sus hooks. Lo compartido
-sube a `components/ui` o a `lib`.
 
 ---
 
@@ -180,7 +189,7 @@ Registralo con proj4 al arrancar la aplicación. Nunca calculés área ni distan
 en Web Mercator: introduce error sistemático y este es un trabajo forestal donde las áreas de
 copa importan.
 
-**Modelo de datos.** `src/api/types.ts` es la fuente única de verdad. Si un tipo cambia, cambia
+**Modelo de datos.** `src/shared/api/types.ts` es la fuente única de verdad. Si un tipo cambia, cambia
 ahí y se propaga. No dupliqués definiciones.
 
 ```ts
@@ -221,7 +230,7 @@ pierde en la precisión del `double`. Sin esa traslación, el centroide llega a 
 del polígono. `geometriaPlana.ts` ya lo hace; cualquier función nueva tiene que hacerlo también.
 
 **Umbral de confianza baja.** 0.70. El generador separa las dos poblaciones en 0.62 y 0.72, así
-que ese valor las distingue sin ambigüedad. Vive en `features/visor/estilosCopa.ts` y no se
+que ese valor las distingue sin ambigüedad. Vive en `entities/copa/estilosCopa.ts` y no se
 duplica.
 
 **Filtros.** Los filtros de confianza y área **ocultan**, no borran. El conteo visible se
@@ -244,7 +253,7 @@ copa marcada para que la exportación pueda reportar cuántas se descartaron.
 - Nombres de dominio en español (`Copa`, `Proyecto`, `areaM2`, `confianza`). Nombres técnicos en
   inglés cuando es convención del ecosistema (`useEffect`, `queryKey`, `handlers`).
 - Estilos con clases utilitarias de Tailwind. Variantes de componente con `cva`. La composición
-  de clases va siempre por el helper `cn()` de `src/lib/utils.ts`, nunca por concatenación de
+  de clases va siempre por el helper `cn()` de `src/shared/lib/utils.ts`, nunca por concatenación de
   strings. Sin CSS-in-JS y sin `*.module.css`. El CSS suelto se reserva para los tokens del tema
   y para las anulaciones de `ol/ol.css`.
 - Un componente por archivo. Si un archivo pasa de ~200 líneas, partilo.
@@ -262,12 +271,12 @@ acción. **Cero animación sobre el canvas del mapa**: el ortomosaico es un COG 
 repintado compite con la carga por rangos HTTP.
 
 La preferencia `prefers-reduced-motion` se lee en un solo lugar, el hook
-`useMovimientoReducido()`, y además `src/index.css` la respeta de forma global. Ninguna
+`useMovimientoReducido()`, y además `src/app/styles/index.css` la respeta de forma global. Ninguna
 información puede depender de que una animación ocurra.
 
 ### 6 ter. Las dos familias de color
 
-El tema vive en `src/index.css` y está partido en dos familias que **no se mezclan nunca**:
+El tema vive en `src/app/styles/index.css` y está partido en dos familias que **no se mezclan nunca**:
 
 **Familia A, el chrome de la interfaz.** Verdes y tierras desaturados, en los nombres de token que
 espera shadcn (`--background`, `--primary`, `--muted`, `--border`, `--ring`…). Se redefine en
@@ -370,7 +379,7 @@ sin sumar dependencias. §3 y §7 quedaron actualizados.
 
 **1 de setiembre de 2026 — geometría plana separada de `geo.ts`.** El script de fixtures corre
 bajo Node plano y no puede cargar proj4 ni OpenLayers, así que la matemática pura se movió a
-`lib/geometriaPlana.ts`, sin ningún `import`. `geo.ts` la reexporta. Ver §4.
+`shared/lib/geometriaPlana.ts`, sin ningún `import`. `geo.ts` la reexporta. Ver §4.
 
 **1 de setiembre de 2026 — el área de Turf no es referencia de área.** Turf mide sobre una esfera,
 no sobre el elipsoide. Para las áreas de copa manda el cálculo plano en EPSG:5367. Ver §5 y el
@@ -378,7 +387,7 @@ resultado de la Fase 2 en `PLAN.md`.
 
 **1 de setiembre de 2026 — fondo del mapa sustituto.** Sin ortomosaico disponible, el visor carga
 un SVG sintético georreferenciado generado con la misma semilla que las copas. El punto de
-conexión del COG queda escrito en `MapaBase.tsx`. El criterio de rendimiento sobre COG de la
+conexión del COG queda escrito en `widgets/mapa/MapaBase.tsx`. El criterio de rendimiento sobre COG de la
 Fase 3 **sigue sin verificar**: es el riesgo principal del proyecto.
 
 **1 de setiembre de 2026 — fotograma real del vuelo.** Se incorporó `DJI_20260415111419_0054.JPG`,
@@ -386,3 +395,13 @@ una toma nadir real de Guanacaste con Zenmuse P1. Vive en `datos-fuente/`, fuera
 fuera del repositorio: 25 MB en `public/` acababan copiados al build. La aplicación sirve dos
 versiones reducidas desde `public/simulacion/`. **No es un ortomosaico**: es un fotograma suelto
 de 0.19 ha, y las copas sintéticas no corresponden a sus árboles. Ver `datos-fuente/LEEME.md`.
+
+**7 de octubre de 2026 — adopción de Feature-Sliced Design.** La estructura por tipo de archivo
+(`features/`, `components/`, `lib/`…) tenía cinco archivos por encima de las ~200 líneas de §6 y
+mezclaba pantallas, bloques y acciones en la misma carpeta. §4 pasa a FSD y la regla de oro de §2
+se reescribe para las capas: solo `app/` y `test/` importan de `mocks/`, y `no-restricted-imports`
+lo verifica en el lint. `store/uiStore.ts` se partió en `shared/store/temaStore.ts` y
+`entities/copa/filtrosStore.ts`, porque `shared` no puede importar de `entities`. Las claves de
+caché de proyectos pasaron a `shared/api/claves.ts` por la misma razón. Sin dependencias nuevas.
+Se consolidaron además los tres `.env` en uno solo (ver §4) y el mockup HTML pasó a
+`docs/mockup/`, separado en HTML, CSS y JS.

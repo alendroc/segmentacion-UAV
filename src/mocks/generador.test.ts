@@ -2,7 +2,7 @@ import { area as areaTurf } from "@turf/area";
 import { polygon } from "@turf/helpers";
 import proj4 from "proj4";
 import { beforeAll, describe, expect, it } from "vitest";
-import { areaAnilloM2, type Posicion } from "@/lib/geometriaPlana";
+import { areaAnilloM2, type Posicion } from "@/shared/lib/geometriaPlana";
 import {
   AREA_INTERES,
   generar,

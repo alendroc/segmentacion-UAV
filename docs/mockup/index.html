@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup — Segmentación de copas UAV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="mockbar">
+  <span class="tag">Mockup · sin funcionalidad real</span>
+  <nav>
+    <button data-go="proyectos">1 · Proyectos</button>
+    <button data-go="procesar">2 · Nuevo procesamiento</button>
+    <button data-go="visor" aria-current="true">3 · Visor de resultados</button>
+    <button data-go="exportacion">4 · Exportación</button>
+  </nav>
+</div>
+
+<!-- ============ 1. PROYECTOS ============ -->
+<section class="screen" id="s-proyectos">
+  <header class="topbar">
+    <div class="brand"><span class="mark"></span><b>Dosel</b></div>
+    <div class="crumb"><span class="proj">Proyectos</span><span class="sub">4 vuelos · 2 en proceso</span></div>
+    <div class="meta"><button class="btn btn-primary" data-go="procesar">Nuevo procesamiento</button></div>
+  </header>
+  <div class="pad">
+    <h2>Vuelos</h2>
+    <p class="sub">Cada vuelo agrupa una imagen, sus detecciones y las correcciones hechas sobre ellas.</p>
+    <div class="grid" id="projgrid"></div>
+  </div>
+</section>
+
+<!-- ============ 2. PROCESAR ============ -->
+<section class="screen" id="s-procesar">
+  <header class="topbar">
+    <div class="brand"><span class="mark"></span><b>Dosel</b></div>
+    <div class="crumb"><span class="proj">Nuevo procesamiento</span><span class="sub">Paso 2 de 3 · Parámetros</span></div>
+    <div class="meta"><button class="btn" data-go="proyectos">Cancelar</button><button class="btn btn-primary" data-go="visor">Ejecutar segmentación</button></div>
+  </header>
+  <div class="pad">
+    <h2>Cargar imagen y configurar</h2>
+    <p class="sub">El sistema recorta la imagen en mosaicos, corre el modelo sobre cada uno y une los polígonos que quedan partidos en los bordes.</p>
+    <div class="form">
+      <div class="sec">
+        <div class="field">
+          <label>Imagen</label>
+          <div class="drop"><b>Arrastre un GeoTIFF aquí</b>Formatos: .tif, .tiff con georreferencia · máx. 8 GB</div>
+        </div>
+        <div class="two">
+          <div class="field"><label>Sistema de coordenadas detectado</label><input class="control" value="EPSG:5367 — CR05 / CRTM05" readonly></div>
+          <div class="field"><label>Resolución (GSD)</label><input class="control" value="2.8 cm/px" readonly></div>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="two">
+          <div class="field"><label>Modelo</label>
+            <input class="control" value="YOLOv8-seg" readonly></div>
+          <div class="field"><label>Pesos</label><input class="control" value="copas_v3_2026-05-18.pth" readonly></div>
+        </div>
+        <div class="two">
+          <div class="field"><label>Tamaño de mosaico (px)</label><input class="control" value="1024"></div>
+          <div class="field"><label>Traslape entre mosaicos (%)</label><input class="control" value="20"></div>
+        </div>
+        <div class="two">
+          <div class="field"><label>Umbral de confianza inicial</label><input class="control" value="0.50"></div>
+          <div class="field"><label>Área mínima de copa (m²)</label><input class="control" value="1.5"></div>
+        </div>
+        <p class="hint">El umbral se puede mover después sobre los resultados sin volver a procesar.</p>
+      </div>
+      <div class="sec">
+        <span class="lbl">Ejecución en curso</span>
+        <div class="bar"><i style="width:64%"></i></div>
+        <div class="rowv"><span class="hint" style="margin:0">Mosaico 118 de 184</span><span class="n">64 % · ~3 min restantes</span></div>
+        <div class="log" style="margin-top:12px">
+          <b>10:42:03</b> Imagen cargada · 14 208 × 11 640 px · 12.4 ha<br>
+          <b>10:42:11</b> Recorte en 184 mosaicos de 1024 px (traslape 20 %)<br>
+          <b>10:43:56</b> Inferencia en GPU · 1.9 mosaicos/s<br>
+          <b>10:47:20</b> 1 093 instancias detectadas · uniendo bordes…
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. VISOR ============ -->
+<section class="screen on" id="s-visor">
+  <header class="topbar">
+    <div class="brand"><span class="mark"></span><b>Dosel</b></div>
+    <div class="crumb"><span class="proj">Lote Norte — vuelo 12 may 2026</span><span class="sub">YOLOv8-seg · copas_v3</span></div>
+    <div class="meta">
+      <div class="cell"><span class="lbl">CRS</span><span class="v">EPSG:5367</span></div>
+      <div class="cell"><span class="lbl">GSD</span><span class="v">2.8 cm/px</span></div>
+      <div class="cell"><span class="lbl">Área</span><span class="v">12.4 ha</span></div>
+      <button class="btn btn-primary" data-go="exportacion">Exportar</button>
+    </div>
+  </header>
+
+  <div class="work">
+    <aside class="side">
+      <div class="block">
+        <span class="lbl">Capas</span>
+        <div class="layer" data-on="1" data-layer="orto"><span class="sw"></span><span class="nm">Imagen</span></div>
+        <div class="layer" data-on="1" data-layer="copas"><span class="sw"></span><span class="nm">Copas detectadas</span><span class="chip" style="background:var(--signal)"></span></div>
+        <div class="layer" data-on="1" data-layer="parcelas"><span class="sw"></span><span class="nm">Parcelas de campo</span><span class="chip" style="background:var(--plot)"></span></div>
+        <div style="margin-top:12px">
+          <span class="lbl">Opacidad de copas</span>
+          <input type="range" id="op" min="10" max="100" value="85">
+        </div>
+      </div>
+
+      <div class="block">
+        <span class="lbl">Filtros</span>
+        <div class="rowv"><label for="conf" style="font-size:12.5px">Confianza mínima</label><span class="n" id="confv">0.50</span></div>
+        <input type="range" id="conf" min="30" max="99" value="50">
+        <div class="rowv" style="margin-top:10px"><label for="amin" style="font-size:12.5px">Área mínima</label><span class="n" id="aminv">1.5 m²</span></div>
+        <input type="range" id="amin" min="0" max="120" value="15">
+        <p class="hint">Mover el umbral no vuelve a correr el modelo: solo filtra lo ya detectado.</p>
+      </div>
+
+      <div class="block">
+        <span class="lbl">Revisión</span>
+        <div class="rowv" style="padding:4px 0"><span>Confirmadas</span><span class="n" id="n-ok">—</span></div>
+        <div class="rowv" style="padding:4px 0"><span>Por revisar</span><span class="n" id="n-low">—</span></div>
+        <div class="rowv" style="padding:4px 0"><span>Descartadas</span><span class="n" id="n-no">—</span></div>
+        <div class="rowv" style="padding:4px 0"><span>Agregadas a mano</span><span class="n">14</span></div>
+      </div>
+    </aside>
+
+    <div class="canvaswrap">
+      <svg id="map" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Imagen con copas segmentadas"></svg>
+
+      <div class="overlay ov-tl">
+        <button class="tool act" title="Navegar">✥</button>
+        <button class="tool" title="Seleccionar copa">▣</button>
+        <button class="tool" title="Dibujar copa nueva">✚</button>
+        <button class="tool" title="Dividir copa unida">◫</button>
+        <button class="tool" title="Unir copas partidas">◧</button>
+        <button class="tool" title="Descartar detección">✕</button>
+      </div>
+
+      <div class="overlay ov-tr">
+        <div class="lbl" style="color:#8FA79A;margin-bottom:5px">Simbología</div>
+        <div class="legend"><i style="background:var(--signal)"></i><span>Confirmada</span></div>
+        <div class="legend"><i style="background:var(--warn)"></i><span>Confianza baja</span></div>
+        <div class="legend"><i style="background:var(--danger)"></i><span>Descartada</span></div>
+        <div class="legend"><i style="background:var(--plot)"></i><span>Parcela de campo</span></div>
+      </div>
+
+      <div class="overlay ov-bl">
+        <div class="scalebar"><span>20 m</span><div class="bar"><i></i><i></i><i></i><i></i></div></div>
+        <div class="north"><b>▲</b>N</div>
+      </div>
+
+      <div class="overlay ov-br" id="coords">9.9385° N &nbsp; 84.0912° O &nbsp;|&nbsp; 1:400</div>
+    </div>
+
+    <aside class="side right" id="detalle">
+      <div class="det-head">
+        <span class="lbl">Copa seleccionada</span>
+        <h3 id="d-id">—</h3>
+        <div style="margin-top:7px"><span class="badge b-ok" id="d-badge">Confirmada</span></div>
+      </div>
+      <div class="block">
+        <div class="thumb" id="d-thumb"></div>
+        <div class="kv"><span class="k">Confianza del modelo</span><span class="v" id="d-conf">—</span></div>
+        <div class="kv"><span class="k">Área de copa</span><span class="v" id="d-area">—</span></div>
+        <div class="kv"><span class="k">Diámetro medio</span><span class="v" id="d-diam">—</span></div>
+        <div class="kv"><span class="k">Vértices del polígono</span><span class="v" id="d-vert">—</span></div>
+        <div class="kv"><span class="k">Centroide</span><span class="v mono" id="d-cent" style="font-size:11px">—</span></div>
+      </div>
+      <div class="block">
+        <span class="lbl">Acciones</span>
+        <div class="acts">
+          <button class="btn">Descartar</button>
+          <button class="btn">Dividir</button>
+        </div>
+      </div>
+      <div class="block" style="border-bottom:0">
+        <span class="lbl">Historial</span>
+        <p class="hint" style="margin-top:8px">Detectada por el modelo · 12 may 10:47<br>Polígono editado por M. Rojas · 13 may 09:12</p>
+      </div>
+    </aside>
+  </div>
+
+  <div class="foot">
+    <div class="cell"><span class="lbl">Copas visibles</span><span class="v" id="f-n">—</span></div>
+    <div class="cell"><span class="lbl">Densidad</span><span class="v" id="f-dens">—</span></div>
+    <div class="cell"><span class="lbl">Diámetro medio</span><span class="v" id="f-dm">—</span></div>
+    <div class="cell"><span class="lbl">Revisión</span><span class="v" id="f-rev">—</span></div>
+    <div class="cell grow">Cambios guardados automáticamente · última edición hace 2 min</div>
+  </div>
+</section>
+
+<!-- ============ 4. EXPORTACIÓN ============ -->
+<section class="screen" id="s-exportacion">
+  <header class="topbar">
+    <div class="brand"><span class="mark"></span><b>Dosel</b></div>
+    <div class="crumb"><span class="proj">Exportación</span><span class="sub">Lote Norte — vuelo 12 may 2026</span></div>
+    <div class="meta"><button class="btn" data-go="visor">Volver al visor</button><button class="btn btn-primary">Generar reporte PDF</button></div>
+  </header>
+  <div class="pad">
+    <div class="two-col">
+      <div>
+        <div class="panelbox">
+          <h3>Distribución de diámetros</h3>
+          <svg viewBox="0 0 320 150" style="width:100%;height:auto" role="img" aria-label="Histograma de diámetros de copa">
+            <g id="hist"></g>
+            <line x1="30" y1="122" x2="312" y2="122" stroke="#D2DACD"></line>
+            <text x="30" y="140" font-family="IBM Plex Mono" font-size="9" fill="#6C7C71">2 m</text>
+            <text x="280" y="140" font-family="IBM Plex Mono" font-size="9" fill="#6C7C71">14 m</text>
+          </svg>
+        </div>
+        <div class="panelbox">
+          <h3>Exportar</h3>
+          <p class="hint" style="margin:0 0 10px">Solo se exportan las copas visibles con los filtros actuales (1 002 de 1 093).</p>
+          <div class="exp">
+            <button class="btn">GeoJSON</button>
+            <button class="btn">GeoPackage</button>
+            <button class="btn">CSV de atributos</button>
+            <button class="btn">Reporte PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="app.js"></script>
+</body>
+</html>

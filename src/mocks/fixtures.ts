@@ -13,7 +13,7 @@ import type {
   ExtensionGeografica,
   OrigenCopa,
   Ortomosaico,
-} from "../api/types";
+} from "../shared/api/types";
 
 interface FeatureCopa {
   geometry: GeoJSON.Polygon;
@@ -88,7 +88,7 @@ export const ORTOMOSAICO: Ortomosaico = {
     crs: "valido",
     resolucion: "valido",
     mensajes: [
-      "Imagen de fondo sustituta: no hay ortomosaico real disponible.",
+      "Imagen de fondo sustituta: no hay imagen real disponible.",
       "El archivo servido es una simulacion generada con la misma semilla que las copas.",
     ],
   },

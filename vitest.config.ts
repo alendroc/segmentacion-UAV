@@ -12,6 +12,13 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     environmentOptions: { jsdom: { url: "http://localhost:5173" } },
+    // El cliente HTTP necesita una URL absoluta bajo Node. Este origen tiene que
+    // coincidir con environmentOptions.jsdom.url, o MSW no reconoce la
+    // peticion como propia.
+    env: {
+      VITE_USE_MOCKS: "false",
+      VITE_API_URL: "http://localhost:5173/api",
+    },
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
     css: false,

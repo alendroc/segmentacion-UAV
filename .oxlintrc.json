@@ -1,17 +1,152 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "ignorePatterns": ["dist/**", "public/mockServiceWorker.js"],
+  "plugins": [
+    "react",
+    "typescript",
+    "oxc"
+  ],
+  "ignorePatterns": [
+    "dist/**",
+    "public/mockServiceWorker.js",
+    "docs/**"
+  ],
   "rules": {
     "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }],
+    "react/only-export-components": [
+      "warn",
+      {
+        "allowConstantExport": true
+      }
+    ],
     "typescript/no-explicit-any": "error"
   },
   "overrides": [
     {
-      "files": ["src/components/ui/**"],
+      "files": [
+        "src/shared/ui/**"
+      ],
       "rules": {
         "react/only-export-components": "off"
+      }
+    },
+    {
+      "files": [
+        "src/shared/**"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@/entities/**",
+                  "@/features/**",
+                  "@/widgets/**",
+                  "@/pages/**",
+                  "@/app/**",
+                  "@/mocks/**",
+                  "**/mocks/**"
+                ],
+                "message": "FSD: una capa solo importa de las inferiores, y src/mocks/ es invisible fuera de app/ y test/ (CLAUDE.md §2)."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "src/entities/**"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@/features/**",
+                  "@/widgets/**",
+                  "@/pages/**",
+                  "@/app/**",
+                  "@/mocks/**",
+                  "**/mocks/**"
+                ],
+                "message": "FSD: una capa solo importa de las inferiores, y src/mocks/ es invisible fuera de app/ y test/ (CLAUDE.md §2)."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "src/features/**"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@/widgets/**",
+                  "@/pages/**",
+                  "@/app/**",
+                  "@/mocks/**",
+                  "**/mocks/**"
+                ],
+                "message": "FSD: una capa solo importa de las inferiores, y src/mocks/ es invisible fuera de app/ y test/ (CLAUDE.md §2)."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "src/widgets/**"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@/pages/**",
+                  "@/app/**",
+                  "@/mocks/**",
+                  "**/mocks/**"
+                ],
+                "message": "FSD: una capa solo importa de las inferiores, y src/mocks/ es invisible fuera de app/ y test/ (CLAUDE.md §2)."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "src/pages/**"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@/app/**",
+                  "@/mocks/**",
+                  "**/mocks/**"
+                ],
+                "message": "FSD: una capa solo importa de las inferiores, y src/mocks/ es invisible fuera de app/ y test/ (CLAUDE.md §2)."
+              }
+            ]
+          }
+        ]
       }
     }
   ]
